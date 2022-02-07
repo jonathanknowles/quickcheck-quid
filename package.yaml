@@ -1,0 +1,49 @@
+name:                quickcheck-quid
+version:             0.1.0.0
+github:              "jonathanknowles/quickcheck-quid"
+license:             Apache-2.0
+author:              "Jonathan Knowles"
+maintainer:          "mail@jonathanknowles.net"
+copyright:           "2022 Jonathan Knowles"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/jonathanknowles/quickcheck-quid#readme>
+
+dependencies:
+- QuickCheck
+- base >= 4.7 && < 5
+- containers
+- deepseq
+- extra
+- hashable
+- hspec
+- pretty-simple
+- quickcheck-classes
+- text
+- uuid
+
+library:
+  source-dirs: src/lib
+
+tests:
+  quickcheck-quid-test:
+    main:                Spec.hs
+    source-dirs:         src/test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - quickcheck-quid
+    build-tools:
+    - hspec-discover == 2.*
