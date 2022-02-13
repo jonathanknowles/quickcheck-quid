@@ -1,5 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
-
 module Test.QuickCheck.Quid
     ( Quid
     , arbitraryQuid
@@ -7,8 +5,6 @@ module Test.QuickCheck.Quid
     , coarbitraryQuid
     , functionQuid
     , shrinkQuid
-    , quidFromNatural
-    , quidToNatural
     )
     where
 
@@ -18,7 +14,5 @@ import Test.QuickCheck.Quid.Internal
     , chooseQuid
     , coarbitraryQuid
     , functionQuid
-    , quidFromNatural
-    , quidToNatural
     , shrinkQuid
     )

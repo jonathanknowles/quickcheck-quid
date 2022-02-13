@@ -41,13 +41,12 @@ import Test.QuickCheck
     , chooseInteger
     , coarbitraryShow
     , functionShow
+    , frequency
     , shrinkMap
     , shrinkMapBy
     )
 import Test.QuickCheck.Function
     ( (:->) )
-import Test.QuickCheck.Natural
-    ( chooseNatural, shrinkNatural)
 import Text.Read
     ( Read (..), ReadPrec (..), choice, get, look, pfail, readMaybe )
 
@@ -191,7 +190,7 @@ quidStringFromQuid (Quid n) =
             go (toEnum (fromIntegral (n `mod` 26)) : acc) (n `div` 26 - 1)
 
 --------------------------------------------------------------------------------
--- Utilities
+-- Reading suppport
 --------------------------------------------------------------------------------
 
 readCharMaybe :: (Char -> Maybe a) -> ReadPrec a
@@ -207,3 +206,26 @@ skipChar charToSkip = readCharMaybe
 
 readWith :: (String -> Maybe a) -> (Int -> String -> [(a, String)])
 readWith f _ = maybe [] (pure . (, "")) . f
+
+--------------------------------------------------------------------------------
+-- Natural number support
+--------------------------------------------------------------------------------
+
+arbitraryNatural :: Gen Natural
+arbitraryNatural = frequency
+    [ (1, pure 0)
+    , (1, pure 1)
+    , (8, chooseNatural (2, 2 ^ 128))
+    ]
+
+chooseNatural :: (Natural, Natural) -> Gen Natural
+chooseNatural (p, q) = fromIntegral @Integer @Natural <$>
+    chooseInteger (fromIntegral p, fromIntegral q)
+
+shrinkNatural :: Natural -> [Natural]
+shrinkNatural n
+    | n == 0 = []
+    | otherwise = L.nub $ 0 : as <> bs
+  where
+    as = takeWhile (<= n `div` 2) (iterate (* 2) 1)
+    bs = (n -) <$> reverse as

@@ -48,14 +48,10 @@ import Test.QuickCheck
     )
 import Test.QuickCheck.Classes.Hspec
     ( testLawsMany )
-import Test.QuickCheck.Natural
-    ( arbitraryNatural, shrinkNatural )
 import Test.QuickCheck.Quid
-    ( Quid
-    , arbitraryQuid
-    , quidFromNatural
-    , shrinkQuid
-    )
+    ( Quid, arbitraryQuid, shrinkQuid )
+import Test.QuickCheck.Quid.Internal
+    ( arbitraryNatural, quidFromNatural, shrinkNatural )
 import Text.Pretty.Simple
     ( pShow )
 
