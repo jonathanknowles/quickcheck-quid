@@ -94,6 +94,19 @@ instance Show (UppercaseLatin Quid) where
     show = show . quidStringFromQuid . unUppercaseLatin
 
 --------------------------------------------------------------------------------
+-- Chunking
+--------------------------------------------------------------------------------
+
+newtype Chunked (n :: Nat) (s :: Symbol) a = Chunked { unChunked :: a }
+    deriving (Data, Eq, Generic, Hashable, NFData, Ord)
+
+instance (KnownNat n, KnownSymbol s, Show a) => Show (Chunked n s a) where
+    show (Chunked a)
+        = L.intercalate (symbolVal (Proxy @s))
+        $ chunksOf (fromIntegral $ natVal $ Proxy @n)
+        $ show a
+
+--------------------------------------------------------------------------------
 -- Prefixes
 --------------------------------------------------------------------------------
 
@@ -201,8 +214,7 @@ instance Read QuidString where
         readTerminator = choice $ (`replicateM` readChar) <$> [4, 3, 2, 1]
 
 instance Show QuidString where
-    show (QuidString cs) =
-        L.intercalate "-" $ F.foldMap show <$> chunksOf 4 (NE.toList cs)
+    show (QuidString cs) = F.foldMap show cs
 
 --------------------------------------------------------------------------------
 -- Generation of arbitrary quid strings

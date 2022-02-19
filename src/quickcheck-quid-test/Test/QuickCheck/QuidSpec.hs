@@ -52,7 +52,8 @@ import Test.QuickCheck.Classes.Hspec
 import Test.QuickCheck.Quid
     ( Quid, arbitraryQuid, shrinkQuid )
 import Test.QuickCheck.Quid.Internal
-    ( Prefix (..)
+    ( Chunked (..)
+    , Prefix (..)
     , Size (..)
     , UppercaseLatin (..)
     , arbitraryNatural
@@ -332,7 +333,7 @@ shrinkWhile condition shrink = loop
 newtype TestId = TestId Quid
     deriving (Eq, Ord)
     deriving Arbitrary via (Size 256 Quid)
-    deriving Show via (Prefix "test-id:" (UppercaseLatin Quid))
+    deriving Show via (Prefix "test-id:" (Chunked 4 "-" (UppercaseLatin Quid)))
 
 --------------------------------------------------------------------------------
 -- Arbitrary instances
