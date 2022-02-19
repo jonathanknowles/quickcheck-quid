@@ -3,6 +3,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
@@ -12,6 +13,8 @@ module Test.QuickCheck.Quid.Internal
 
 import Control.Applicative
     ( many, (<|>) )
+import Control.Arrow
+    ( (&&&) )
 import Control.DeepSeq
     ( NFData )
 import Control.Monad
@@ -26,8 +29,12 @@ import Data.List.Extra
     ( chunksOf )
 import Data.List.NonEmpty
     ( NonEmpty )
+import Data.Map.Strict
+    ( Map )
 import Data.Maybe
     ( catMaybes )
+import Data.Ord
+    ( Down (..) )
 import Data.Text
     ( Text )
 import GHC.Generics
@@ -53,6 +60,7 @@ import Text.Read
 import qualified Data.Foldable as F
 import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
+import qualified Data.Map.Strict as Map
 import qualified Data.Text as T
 import qualified Test.QuickCheck as QC
 
@@ -75,7 +83,7 @@ instance Show Quid where
 --------------------------------------------------------------------------------
 
 arbitraryQuid :: Int -> Gen Quid
-arbitraryQuid = fmap quidStringToQuid . arbitraryQuidString
+arbitraryQuid i = chooseQuid (Quid 0, Quid $ (2 ^ max 0 i) - 1)
 
 chooseQuid :: (Quid, Quid) -> Gen Quid
 chooseQuid (Quid n1, Quid n2) = Quid <$> chooseNatural (n1, n2)
@@ -229,3 +237,13 @@ shrinkNatural n
   where
     as = takeWhile (<= n `div` 2) (iterate (* 2) 1)
     bs = (n -) <$> reverse as
+
+--------------------------------------------------------------------------------
+-- Utilities
+--------------------------------------------------------------------------------
+
+frequencies :: (Foldable f, Ord k) => f k -> [(k, Int)]
+frequencies
+    = L.sortOn ((Down . snd) &&& fst)
+    . Map.toList
+    . L.foldr (flip (Map.insertWith (+)) 1) Map.empty
