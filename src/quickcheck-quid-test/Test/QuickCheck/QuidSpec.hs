@@ -329,7 +329,7 @@ shrinkWhile condition shrink = loop
 -- Test types
 --------------------------------------------------------------------------------
 
-newtype TestId = TestId { unTestId :: Quid }
+newtype TestId = TestId Quid
     deriving (Eq, Ord)
     deriving Arbitrary via (Size 256 Quid)
     deriving Show via (Prefix "test-id" (UppercaseLatin Quid))
