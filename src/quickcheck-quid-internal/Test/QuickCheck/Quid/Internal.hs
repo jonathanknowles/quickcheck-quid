@@ -110,11 +110,21 @@ instance (KnownNat n, KnownSymbol s, Show a) => Show (Chunked n s a) where
 -- Prefixes
 --------------------------------------------------------------------------------
 
-newtype Prefix (p :: Symbol) a = Prefix { unPrefix :: a }
+newtype Prefix (prefix :: Symbol) a = Prefix { unPrefix :: a }
     deriving (Data, Eq, Generic, Hashable, NFData, Ord)
 
-instance (KnownSymbol p, Show a) => Show (Prefix p a) where
-    show (Prefix a) = symbolVal (Proxy @p) <> show a
+instance (KnownSymbol prefix, Read a) => Read (Prefix prefix a) where
+    readPrec = do
+        many (skipChar ' ')
+        remainder <- look
+        if prefix `L.isPrefixOf` remainder
+        then replicateM_ (length prefix) get >> Prefix <$> readPrec @a
+        else pfail
+      where
+        prefix = symbolVal (Proxy @prefix)
+
+instance (KnownSymbol prefix, Show a) => Show (Prefix prefix a) where
+    show (Prefix a) = symbolVal (Proxy @prefix) <> show a
 
 --------------------------------------------------------------------------------
 -- Sizes

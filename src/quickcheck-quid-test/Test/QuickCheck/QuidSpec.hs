@@ -85,6 +85,10 @@ spec = do
             [ Laws.showLaws
             , Laws.showReadLaws
             ]
+        testLawsMany @(Prefix "test-prefix:" Int)
+            [ Laws.showLaws
+            , Laws.showReadLaws
+            ]
 
     parallel $ describe "Uniformity" $ do
         it "prop_arbitraryQuid_uniform" $
@@ -338,6 +342,10 @@ newtype TestId = TestId Quid
 --------------------------------------------------------------------------------
 -- Arbitrary instances
 --------------------------------------------------------------------------------
+
+instance Arbitrary a => Arbitrary (Prefix p a) where
+    arbitrary = Prefix <$> arbitrary
+    shrink = shrinkMapBy Prefix unPrefix shrink
 
 newtype Sized a = Sized { unSized :: a }
     deriving newtype (Eq, Ord, Read, Show)
