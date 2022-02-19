@@ -51,7 +51,7 @@ import Test.QuickCheck.Classes.Hspec
 import Test.QuickCheck.Quid
     ( Quid, arbitraryQuid, shrinkQuid )
 import Test.QuickCheck.Quid.Internal
-    ( arbitraryNatural, quidFromNatural, shrinkNatural )
+    ( UppercaseLatin (..), arbitraryNatural, quidFromNatural, shrinkNatural )
 import Text.Pretty.Simple
     ( pShow )
 
@@ -72,7 +72,9 @@ spec = do
         testLawsMany @(Sized Quid)
             [ Laws.eqLaws
             , Laws.ordLaws
-            , Laws.showLaws
+            ]
+        testLawsMany @(Sized (UppercaseLatin Quid))
+            [ Laws.showLaws
             , Laws.showReadLaws
             ]
 
@@ -133,7 +135,7 @@ prop_arbitraryQuid_uniform =
     charFrequenciesOfQuid q = foldr
         (\c m -> Map.insertWith (+) c 1 m)
         Map.empty
-        (filter (/= '-') (show q))
+        (filter (/= '-') (show (UppercaseLatin q)))
 
     charFrequenciesOfQuids :: [Quid] -> Map Char Int
     charFrequenciesOfQuids qs =
@@ -169,7 +171,7 @@ prop_shrinkQuid_minimalElement (Sized q) =
         s : _ -> s === minimalQuid
         _     -> q === minimalQuid
   where
-    minimalQuid = read "A"
+    minimalQuid = quidFromNatural 0
 
 prop_shrinkQuid_minimalSet :: [Width32 Quid] -> Property
 prop_shrinkQuid_minimalSet qs =
@@ -217,7 +219,7 @@ prop_shrinkQuid_unique (Width32 q) =
 unitTests_show_quidFromNatural :: Spec
 unitTests_show_quidFromNatural = unitTests
     "unitTests_show_quidFromNatural"
-    (show . quidFromNatural)
+    (show . UppercaseLatin . quidFromNatural)
     (mkTest <$> tests)
   where
     mkTest (params, result) = UnitTestData {params, result}
@@ -329,6 +331,13 @@ newtype Width32 a = Width32 { unWidth32 :: a }
 instance Arbitrary (Sized Quid) where
     arbitrary = Sized <$> sized arbitraryQuid
     shrink = shrinkMapBy Sized unSized shrinkQuid
+
+instance Arbitrary (Sized (UppercaseLatin Quid)) where
+    arbitrary = Sized . UppercaseLatin <$> sized arbitraryQuid
+    shrink = shrinkMapBy
+        (Sized . UppercaseLatin)
+        (unUppercaseLatin . unSized)
+        shrinkQuid
 
 instance Arbitrary (Width32 Quid) where
     arbitrary = Width32 <$> arbitraryQuid 32

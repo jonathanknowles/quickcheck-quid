@@ -1,6 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -70,13 +71,20 @@ import qualified Test.QuickCheck as QC
 
 newtype Quid = Quid
     { unQuid :: Natural }
+    deriving (Data, Eq, Generic, Hashable, NFData, Ord, Read, Show)
+
+--------------------------------------------------------------------------------
+-- Uppercase Latin representation
+--------------------------------------------------------------------------------
+
+newtype UppercaseLatin a = UppercaseLatin { unUppercaseLatin :: a }
     deriving (Data, Eq, Generic, Hashable, NFData, Ord)
 
-instance Read Quid where
-    readPrec = quidStringToQuid <$> readPrec
+instance Read (UppercaseLatin Quid) where
+    readPrec = UppercaseLatin . quidStringToQuid <$> readPrec
 
-instance Show Quid where
-    show = show . quidStringFromQuid
+instance Show (UppercaseLatin Quid) where
+    show = show . quidStringFromQuid . unUppercaseLatin
 
 --------------------------------------------------------------------------------
 -- Generation and shrinking of arbitrary quids
