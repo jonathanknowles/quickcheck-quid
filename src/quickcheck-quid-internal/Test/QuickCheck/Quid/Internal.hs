@@ -115,13 +115,9 @@ newtype Prefix (prefix :: Symbol) a = Prefix { unPrefix :: a }
 
 instance (KnownSymbol prefix, Read a) => Read (Prefix prefix a) where
     readPrec = do
-        many (skipChar ' ')
-        remainder <- look
-        if prefix `L.isPrefixOf` remainder
-        then replicateM_ (length prefix) get >> Prefix <$> readPrec @a
-        else pfail
-      where
-        prefix = symbolVal (Proxy @prefix)
+        many $ skipChar ' '
+        skipString $ symbolVal $ Proxy @prefix
+        Prefix <$> readPrec @a
 
 instance (KnownSymbol prefix, Show a) => Show (Prefix prefix a) where
     show (Prefix a) = symbolVal (Proxy @prefix) <> show a
@@ -265,6 +261,13 @@ readCharMaybe f = look >>= \case
         get >> pure c
     _ ->
         pfail
+
+skipString :: String -> ReadPrec ()
+skipString stringToSkip = do
+    remainder <- look
+    if stringToSkip `L.isPrefixOf` remainder
+    then replicateM_ (length stringToSkip) get
+    else pfail
 
 skipChar :: Char -> ReadPrec ()
 skipChar charToSkip = readCharMaybe
