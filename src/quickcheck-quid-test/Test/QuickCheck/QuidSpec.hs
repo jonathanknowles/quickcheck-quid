@@ -152,15 +152,15 @@ prop_arbitraryQuid_unique =
         Set.size (Set.fromList uids) === L.length uids
   where
     arbitraryFixedWidthQuids :: Gen [Quid]
-    arbitraryFixedWidthQuids = fmap unWidth32 <$>
-        replicateM 1_000_000 (arbitrary @(Width32 Quid))
+    arbitraryFixedWidthQuids = fmap unWidth256 <$>
+        replicateM 1_000_000 (arbitrary @(Width256 Quid))
 
 --------------------------------------------------------------------------------
 -- Shrinkability
 --------------------------------------------------------------------------------
 
-prop_shrinkQuid_lessThan :: Width32 Quid -> Property
-prop_shrinkQuid_lessThan (Width32 q) =
+prop_shrinkQuid_lessThan :: Width256 Quid -> Property
+prop_shrinkQuid_lessThan (Width256 q) =
     property $ all (< q) (shrinkQuid q)
 
 prop_shrinkQuid_minimalElement :: Sized Quid -> Property
@@ -173,7 +173,7 @@ prop_shrinkQuid_minimalElement (Sized q) =
   where
     minimalQuid = quidFromNatural 0
 
-prop_shrinkQuid_minimalSet :: [Width32 Quid] -> Property
+prop_shrinkQuid_minimalSet :: [Width256 Quid] -> Property
 prop_shrinkQuid_minimalSet qs =
     label (show $ bucket expectedSize) $
     counterexample (show expectedSize) $
@@ -196,18 +196,18 @@ prop_shrinkQuid_minimalSet qs =
     expectedSize = L.length qs
 
     minimalSet :: Set Quid
-    minimalSet = Set.map unWidth32 $ fromMaybe
+    minimalSet = Set.map unWidth256 $ fromMaybe
         (error "Cannot shrink to minimal set")
         (shrinkWhile ((>= expectedSize) . Set.size) shrink (Set.fromList qs))
 
-prop_shrinkQuid_ordered :: Width32 Quid -> Property
-prop_shrinkQuid_ordered (Width32 q) =
+prop_shrinkQuid_ordered :: Width256 Quid -> Property
+prop_shrinkQuid_ordered (Width256 q) =
     L.sort shrunkValues === shrunkValues
   where
     shrunkValues = shrinkQuid q
 
-prop_shrinkQuid_unique :: Width32 Quid -> Property
-prop_shrinkQuid_unique (Width32 q) =
+prop_shrinkQuid_unique :: Width256 Quid -> Property
+prop_shrinkQuid_unique (Width256 q) =
     Set.size (Set.fromList shrunkValues) === L.length shrunkValues
   where
     shrunkValues = shrinkQuid q
@@ -325,7 +325,7 @@ shrinkWhile condition shrink = loop
 newtype Sized a = Sized { unSized :: a }
     deriving newtype (Eq, Ord, Read, Show)
 
-newtype Width32 a = Width32 { unWidth32 :: a }
+newtype Width256 a = Width256 { unWidth256 :: a }
     deriving newtype (Eq, Ord, Read, Show)
 
 instance Arbitrary (Sized Quid) where
@@ -339,6 +339,6 @@ instance Arbitrary (Sized (UppercaseLatin Quid)) where
         (unUppercaseLatin . unSized)
         shrinkQuid
 
-instance Arbitrary (Width32 Quid) where
-    arbitrary = Width32 <$> arbitraryQuid 32
-    shrink = shrinkMapBy Width32 unWidth32 shrinkQuid
+instance Arbitrary (Width256 Quid) where
+    arbitrary = Width256 <$> arbitraryQuid 256
+    shrink = shrinkMapBy Width256 unWidth256 shrinkQuid
