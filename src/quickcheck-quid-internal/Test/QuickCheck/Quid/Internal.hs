@@ -101,7 +101,7 @@ newtype Prefix (p :: Symbol) a = Prefix { unPrefix :: a }
     deriving (Data, Eq, Generic, Hashable, NFData, Ord)
 
 instance (KnownSymbol p, Show a) => Show (Prefix p a) where
-    show (Prefix a) = symbolVal (Proxy @p) <> ":" <> show a
+    show (Prefix a) = symbolVal (Proxy @p) <> show a
 
 --------------------------------------------------------------------------------
 -- Sizes

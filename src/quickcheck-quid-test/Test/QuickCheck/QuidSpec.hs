@@ -332,7 +332,7 @@ shrinkWhile condition shrink = loop
 newtype TestId = TestId Quid
     deriving (Eq, Ord)
     deriving Arbitrary via (Size 256 Quid)
-    deriving Show via (Prefix "test-id" (UppercaseLatin Quid))
+    deriving Show via (Prefix "test-id:" (UppercaseLatin Quid))
 
 --------------------------------------------------------------------------------
 -- Arbitrary instances
