@@ -1,8 +1,10 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
@@ -36,10 +38,14 @@ import Data.Maybe
     ( catMaybes )
 import Data.Ord
     ( Down (..) )
+import Data.Proxy
+    ( Proxy (..) )
 import Data.Text
     ( Text )
 import GHC.Generics
     ( Generic )
+import GHC.TypeLits
+    ( KnownSymbol, Symbol, symbolVal )
 import Numeric.Natural
     ( Natural )
 import Test.QuickCheck
@@ -85,6 +91,16 @@ instance Read (UppercaseLatin Quid) where
 
 instance Show (UppercaseLatin Quid) where
     show = show . quidStringFromQuid . unUppercaseLatin
+
+--------------------------------------------------------------------------------
+-- Prefixes
+--------------------------------------------------------------------------------
+
+newtype Prefix (p :: Symbol) a = Prefix { unPrefix :: a }
+    deriving (Data, Eq, Generic, Hashable, NFData, Ord)
+
+instance (KnownSymbol p, Show a) => Show (Prefix p a) where
+    show (Prefix a) = symbolVal (Proxy @p) <> ":" <> show a
 
 --------------------------------------------------------------------------------
 -- Generation and shrinking of arbitrary quids

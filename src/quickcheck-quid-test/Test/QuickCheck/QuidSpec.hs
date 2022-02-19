@@ -1,5 +1,6 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE NumericUnderscores #-}
@@ -51,7 +52,12 @@ import Test.QuickCheck.Classes.Hspec
 import Test.QuickCheck.Quid
     ( Quid, arbitraryQuid, shrinkQuid )
 import Test.QuickCheck.Quid.Internal
-    ( UppercaseLatin (..), arbitraryNatural, quidFromNatural, shrinkNatural )
+    ( Prefix (..)
+    , UppercaseLatin (..)
+    , arbitraryNatural
+    , quidFromNatural
+    , shrinkNatural
+    )
 import Text.Pretty.Simple
     ( pShow )
 
@@ -317,6 +323,18 @@ shrinkWhile condition shrink = loop
                 Just a' -> loop a'
         | otherwise =
             Nothing
+
+--------------------------------------------------------------------------------
+-- Test types
+--------------------------------------------------------------------------------
+
+newtype TestId = TestId { unTestId :: Quid }
+    deriving (Eq, Ord)
+    deriving Show via (Prefix "test-id" (UppercaseLatin Quid))
+
+instance Arbitrary TestId where
+    arbitrary = TestId <$> arbitraryQuid 256
+    shrink = shrinkMapBy TestId unTestId shrinkQuid
 
 --------------------------------------------------------------------------------
 -- Arbitrary instances
