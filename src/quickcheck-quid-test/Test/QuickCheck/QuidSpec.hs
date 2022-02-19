@@ -53,6 +53,7 @@ import Test.QuickCheck.Quid
     ( Quid, arbitraryQuid, shrinkQuid )
 import Test.QuickCheck.Quid.Internal
     ( Prefix (..)
+    , Size (..)
     , UppercaseLatin (..)
     , arbitraryNatural
     , quidFromNatural
@@ -330,11 +331,8 @@ shrinkWhile condition shrink = loop
 
 newtype TestId = TestId { unTestId :: Quid }
     deriving (Eq, Ord)
+    deriving Arbitrary via (Size 256 Quid)
     deriving Show via (Prefix "test-id" (UppercaseLatin Quid))
-
-instance Arbitrary TestId where
-    arbitrary = TestId <$> arbitraryQuid 256
-    shrink = shrinkMapBy TestId unTestId shrinkQuid
 
 --------------------------------------------------------------------------------
 -- Arbitrary instances

@@ -45,11 +45,12 @@ import Data.Text
 import GHC.Generics
     ( Generic )
 import GHC.TypeLits
-    ( KnownSymbol, Symbol, symbolVal )
+    ( KnownNat, KnownSymbol, Nat, Symbol, natVal, symbolVal )
 import Numeric.Natural
     ( Natural )
 import Test.QuickCheck
-    ( Function (..)
+    ( Arbitrary (..)
+    , Function (..)
     , Gen
     , arbitraryBoundedEnum
     , chooseInteger
@@ -101,6 +102,17 @@ newtype Prefix (p :: Symbol) a = Prefix { unPrefix :: a }
 
 instance (KnownSymbol p, Show a) => Show (Prefix p a) where
     show (Prefix a) = symbolVal (Proxy @p) <> ":" <> show a
+
+--------------------------------------------------------------------------------
+-- Sizes
+--------------------------------------------------------------------------------
+
+newtype Size (n :: Nat) a = Size { unSize :: a }
+    deriving (Data, Eq, Generic, Hashable, NFData, Ord)
+
+instance KnownNat n => Arbitrary (Size n Quid) where
+    arbitrary = Size <$> arbitraryQuid (fromIntegral $ natVal $ Proxy @n)
+    shrink = shrinkMapBy Size unSize shrinkQuid
 
 --------------------------------------------------------------------------------
 -- Generation and shrinking of arbitrary quids
