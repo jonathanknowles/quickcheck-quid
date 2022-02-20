@@ -6,7 +6,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TupleSections #-}
 
-module Internal.Test.QuickCheck.Quid.Representations.UppercaseLatin
+module Internal.Test.QuickCheck.Quid.Representations.Latin
     where
 
 import Control.Applicative
@@ -47,94 +47,94 @@ import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 
 --------------------------------------------------------------------------------
--- Uppercase Latin representation
+-- Latin representation
 --------------------------------------------------------------------------------
 
-newtype UppercaseLatin a = UppercaseLatin { unUppercaseLatin :: a }
+newtype Latin a = Latin { unLatin :: a }
     deriving (Data, Eq, Generic, Hashable, NFData, Ord)
 
-instance Read (UppercaseLatin Quid) where
-    readPrec = UppercaseLatin . uppercaseLatinStringToQuid <$> readPrec
+instance Read (Latin Quid) where
+    readPrec = Latin . latinStringToQuid <$> readPrec
 
-instance Show (UppercaseLatin Quid) where
-    show = show . uppercaseLatinStringFromQuid . unUppercaseLatin
+instance Show (Latin Quid) where
+    show = show . latinStringFromQuid . unLatin
 
 --------------------------------------------------------------------------------
--- Uppercase Latin characters
+-- Latin characters
 --------------------------------------------------------------------------------
 
-data UppercaseLatinChar
+data LatinChar
     = A | B | C | D | E | F | G | H | I | J | K | L | M
     | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
     deriving (Bounded, Enum, Eq, Ord, Read, Show)
 
 --------------------------------------------------------------------------------
--- Generation and shrinking of arbitrary uppercase Latin characters
+-- Generation and shrinking of arbitrary Latin characters
 --------------------------------------------------------------------------------
 
-arbitraryUppercaseLatinChar :: Gen UppercaseLatinChar
-arbitraryUppercaseLatinChar = arbitraryBoundedEnum
+arbitraryLatinChar :: Gen LatinChar
+arbitraryLatinChar = arbitraryBoundedEnum
 
-shrinkUppercaseLatinChar :: UppercaseLatinChar -> [UppercaseLatinChar]
-shrinkUppercaseLatinChar = shrinkMap toEnum fromEnum
-
---------------------------------------------------------------------------------
--- Conversion between uppercase Latin characters and ordinary characters
---------------------------------------------------------------------------------
-
-uppercaseLatinCharFromChar :: Char -> Maybe UppercaseLatinChar
-uppercaseLatinCharFromChar c = readMaybe [c]
-
-uppercaseLatinCharToChar :: UppercaseLatinChar -> Char
-uppercaseLatinCharToChar = head . show
+shrinkLatinChar :: LatinChar -> [LatinChar]
+shrinkLatinChar = shrinkMap toEnum fromEnum
 
 --------------------------------------------------------------------------------
--- Uppercase Latin strings
+-- Conversion between Latin characters and ordinary characters
 --------------------------------------------------------------------------------
 
-newtype UppercaseLatinString = UppercaseLatinString
-    { unUppercaseLatinString :: NonEmpty UppercaseLatinChar }
+latinCharFromChar :: Char -> Maybe LatinChar
+latinCharFromChar c = readMaybe [c]
+
+latinCharToChar :: LatinChar -> Char
+latinCharToChar = head . show
+
+--------------------------------------------------------------------------------
+-- Latin strings
+--------------------------------------------------------------------------------
+
+newtype LatinString = LatinString
+    { unLatinString :: NonEmpty LatinChar }
     deriving (Eq, Ord)
 
 --------------------------------------------------------------------------------
--- Conversion between uppercase Latin strings and ordinary strings
+-- Conversion between Latin strings and ordinary strings
 --------------------------------------------------------------------------------
 
-instance Read UppercaseLatinString where
+instance Read LatinString where
     readPrec = do
         many (skipChar ' ')
-        UppercaseLatinString <$> ((:|) <$> readChar <*> many readChar)
+        LatinString <$> ((:|) <$> readChar <*> many readChar)
       where
-        readChar :: ReadPrec UppercaseLatinChar
-        readChar = readCharMaybe uppercaseLatinCharFromChar
+        readChar :: ReadPrec LatinChar
+        readChar = readCharMaybe latinCharFromChar
 
-instance Show UppercaseLatinString where
-    show (UppercaseLatinString cs) = F.foldMap show cs
-
---------------------------------------------------------------------------------
--- Generation of arbitrary uppercase Latin strings
---------------------------------------------------------------------------------
-
-arbitraryUppercaseLatinString :: Int -> Gen UppercaseLatinString
-arbitraryUppercaseLatinString stringLen =
-    UppercaseLatinString . NE.fromList <$>
-    replicateM (max 1 stringLen) arbitraryUppercaseLatinChar
+instance Show LatinString where
+    show (LatinString cs) = F.foldMap show cs
 
 --------------------------------------------------------------------------------
--- Conversion between uppercase Latin strings and quids
+-- Generation of arbitrary Latin strings
 --------------------------------------------------------------------------------
 
-uppercaseLatinStringToQuid :: UppercaseLatinString -> Quid
-uppercaseLatinStringToQuid (UppercaseLatinString xs) = Quid $
+arbitraryLatinString :: Int -> Gen LatinString
+arbitraryLatinString stringLen =
+    LatinString . NE.fromList <$>
+    replicateM (max 1 stringLen) arbitraryLatinChar
+
+--------------------------------------------------------------------------------
+-- Conversion between Latin strings and quids
+--------------------------------------------------------------------------------
+
+latinStringToQuid :: LatinString -> Quid
+latinStringToQuid (LatinString xs) = Quid $
     F.foldl' f 0 xs - 1
   where
     f !acc !x = acc * 26 + 1 + fromIntegral (fromEnum x)
 
-uppercaseLatinStringFromQuid :: Quid -> UppercaseLatinString
-uppercaseLatinStringFromQuid (Quid n) =
-    UppercaseLatinString . NE.fromList $ go [] n
+latinStringFromQuid :: Quid -> LatinString
+latinStringFromQuid (Quid n) =
+    LatinString . NE.fromList $ go [] n
   where
-    go :: [UppercaseLatinChar] -> Natural -> [UppercaseLatinChar]
+    go :: [LatinChar] -> Natural -> [LatinChar]
     go !acc !n
         | n < 26 =
             toEnum (fromIntegral n) : acc

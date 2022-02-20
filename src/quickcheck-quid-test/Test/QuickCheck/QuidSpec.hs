@@ -39,8 +39,8 @@ import Internal.Test.QuickCheck.Quid
     , shrinkNatural
     , shrinkQuid
     )
-import Internal.Test.QuickCheck.Quid.Representations.UppercaseLatin
-    ( UppercaseLatin (..) )
+import Internal.Test.QuickCheck.Quid.Representations.Latin
+    ( Latin (..) )
 import Numeric.Natural
     ( Natural )
 import Test.Hspec
@@ -86,7 +86,7 @@ spec = do
             [ Laws.eqLaws
             , Laws.ordLaws
             ]
-        testLawsMany @(Sized (UppercaseLatin Quid))
+        testLawsMany @(Sized (Latin Quid))
             [ Laws.showLaws
             , Laws.showReadLaws
             ]
@@ -116,7 +116,7 @@ spec = do
             property prop_shrinkQuid_unique
 
     parallel $ describe "Unit tests" $ do
-        unitTests_show_uppercaseLatin_quidFromNatural
+        unitTests_show_latin_quidFromNatural
 
 --------------------------------------------------------------------------------
 -- Uniformity
@@ -268,10 +268,10 @@ prop_shrinkQuid_unique (Width256 q) =
 -- Unit tests
 --------------------------------------------------------------------------------
 
-unitTests_show_uppercaseLatin_quidFromNatural :: Spec
-unitTests_show_uppercaseLatin_quidFromNatural = unitTests
-    "unitTests_show_uppercaseLatin_quidFromNatural"
-    (show . UppercaseLatin . quidFromNatural)
+unitTests_show_latin_quidFromNatural :: Spec
+unitTests_show_latin_quidFromNatural = unitTests
+    "unitTests_show_latin_quidFromNatural"
+    (show . Latin . quidFromNatural)
     (mkTest <$> tests)
   where
     mkTest (params, result) = UnitTestData {params, result}
@@ -377,7 +377,7 @@ shrinkWhile condition shrink = loop
 newtype TestId = TestId Quid
     deriving (Eq, Ord)
     deriving Arbitrary via (Size 256 Quid)
-    deriving Show via (Prefix "test-id:" (Chunked 4 "-" (UppercaseLatin Quid)))
+    deriving Show via (Prefix "test-id:" (Chunked 4 "-" (Latin Quid)))
 
 --------------------------------------------------------------------------------
 -- Arbitrary instances
@@ -397,11 +397,11 @@ instance Arbitrary (Sized Quid) where
     arbitrary = Sized <$> sized arbitraryQuid
     shrink = shrinkMapBy Sized unSized shrinkQuid
 
-instance Arbitrary (Sized (UppercaseLatin Quid)) where
-    arbitrary = Sized . UppercaseLatin <$> sized arbitraryQuid
+instance Arbitrary (Sized (Latin Quid)) where
+    arbitrary = Sized . Latin <$> sized arbitraryQuid
     shrink = shrinkMapBy
-        (Sized . UppercaseLatin)
-        (unUppercaseLatin . unSized)
+        (Sized . Latin)
+        (unLatin . unSized)
         shrinkQuid
 
 instance Arbitrary (Width256 Quid) where
