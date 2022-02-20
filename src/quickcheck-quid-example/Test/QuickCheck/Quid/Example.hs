@@ -18,6 +18,7 @@ import Test.QuickCheck
     , applyFun
     , label
     , property
+    , (===)
     )
 import Test.QuickCheck.Quid
     ( Latin (..), Prefix (..), Quid (..), Size (..) )
@@ -33,3 +34,6 @@ prop_function :: Fun ExampleQuid Bool -> ExampleQuid -> Property
 prop_function f q =
     label (show (applyFun f q)) $
     property True
+
+prop_minimalFailure :: ExampleQuid -> ExampleQuid -> Property
+prop_minimalFailure q1 q2 = q1 === q2
