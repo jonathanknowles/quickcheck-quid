@@ -37,8 +37,8 @@ import Internal.Test.QuickCheck.Quid
     , shrinkNatural
     , shrinkQuid
     )
-import Internal.Test.QuickCheck.Quid.Combinators.Chunked
-    ( Chunked (..) )
+import Internal.Test.QuickCheck.Quid.Combinators.Chunk
+    ( Chunk (..) )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
     ( Latin (..) )
 import Numeric.Natural
@@ -279,7 +279,7 @@ shrinkWhile condition shrink = loop
 newtype TestId = TestId Quid
     deriving (Eq, Ord)
     deriving Arbitrary via (Size 256 Quid)
-    deriving Show via (Prefix "test-id:" (Chunked 4 "-" (Latin Quid)))
+    deriving Show via (Prefix "test-id:" (Chunk 4 "-" (Latin Quid)))
 
 --------------------------------------------------------------------------------
 -- Arbitrary instances

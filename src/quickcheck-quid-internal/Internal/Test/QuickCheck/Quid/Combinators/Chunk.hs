@@ -6,7 +6,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
-module Internal.Test.QuickCheck.Quid.Combinators.Chunked
+module Internal.Test.QuickCheck.Quid.Combinators.Chunk
     where
 
 import Control.DeepSeq
@@ -27,14 +27,14 @@ import GHC.TypeLits
 import qualified Data.List as L
 
 --------------------------------------------------------------------------------
--- Chunked combinator
+-- Chunk combinator
 --------------------------------------------------------------------------------
 
-newtype Chunked (n :: Nat) (s :: Symbol) a = Chunked { unChunked :: a }
+newtype Chunk (n :: Nat) (s :: Symbol) a = Chunk { unChunk :: a }
     deriving (Data, Eq, Generic, Hashable, NFData, Ord)
 
-instance (KnownNat n, KnownSymbol s, Show a) => Show (Chunked n s a) where
-    show (Chunked a)
+instance (KnownNat n, KnownSymbol s, Show a) => Show (Chunk n s a) where
+    show (Chunk a)
         = L.intercalate (symbolVal (Proxy @s))
         $ chunksOf (fromIntegral $ natVal $ Proxy @n)
         $ show a
