@@ -117,13 +117,6 @@ quidToNatural = unQuid
 -- Natural number support
 --------------------------------------------------------------------------------
 
-arbitraryNatural :: Gen Natural
-arbitraryNatural = frequency
-    [ (1, pure 0)
-    , (1, pure 1)
-    , (8, chooseNatural (2, 2 ^ 128))
-    ]
-
 chooseNatural :: (Natural, Natural) -> Gen Natural
 chooseNatural (p, q) = fromIntegral @Integer @Natural <$>
     chooseInteger (fromIntegral p, fromIntegral q)

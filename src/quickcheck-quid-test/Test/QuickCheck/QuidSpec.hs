@@ -29,7 +29,6 @@ import Data.Set
 import Internal.Test.QuickCheck.Quid
     ( Quid
     , Size (..)
-    , arbitraryNatural
     , arbitraryQuid
     , quidFromNatural
     , quidToNatural
