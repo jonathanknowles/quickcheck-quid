@@ -78,22 +78,6 @@ newtype Quid = Quid
     deriving (Data, Eq, Generic, Hashable, NFData, Ord, Read, Show)
 
 --------------------------------------------------------------------------------
--- Prefixes
---------------------------------------------------------------------------------
-
-newtype Prefix (prefix :: Symbol) a = Prefix { unPrefix :: a }
-    deriving (Data, Eq, Generic, Hashable, NFData, Ord)
-
-instance (KnownSymbol prefix, Read a) => Read (Prefix prefix a) where
-    readPrec = do
-        many $ skipChar ' '
-        skipString $ symbolVal $ Proxy @prefix
-        Prefix <$> readPrec @a
-
-instance (KnownSymbol prefix, Show a) => Show (Prefix prefix a) where
-    show (Prefix a) = symbolVal (Proxy @prefix) <> show a
-
---------------------------------------------------------------------------------
 -- Sizes
 --------------------------------------------------------------------------------
 

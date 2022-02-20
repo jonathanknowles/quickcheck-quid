@@ -26,7 +26,6 @@ import Data.Set
     ( Set )
 import Internal.Test.QuickCheck.Quid
     ( Frequency (..)
-    , Prefix (..)
     , Quid
     , Size (..)
     , arbitraryNatural
@@ -39,6 +38,8 @@ import Internal.Test.QuickCheck.Quid
     )
 import Internal.Test.QuickCheck.Quid.Combinators.Chunk
     ( Chunk (..) )
+import Internal.Test.QuickCheck.Quid.Combinators.Prefix
+    ( Prefix (..) )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
     ( Latin (..) )
 import Numeric.Natural
