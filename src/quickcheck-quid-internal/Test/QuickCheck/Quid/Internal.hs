@@ -88,10 +88,10 @@ newtype UppercaseLatin a = UppercaseLatin { unUppercaseLatin :: a }
     deriving (Data, Eq, Generic, Hashable, NFData, Ord)
 
 instance Read (UppercaseLatin Quid) where
-    readPrec = UppercaseLatin . quidStringToQuid <$> readPrec
+    readPrec = UppercaseLatin . uppercaseLatinStringToQuid <$> readPrec
 
 instance Show (UppercaseLatin Quid) where
-    show = show . quidStringFromQuid . unUppercaseLatin
+    show = show . uppercaseLatinStringFromQuid . unUppercaseLatin
 
 --------------------------------------------------------------------------------
 -- Chunking
@@ -163,80 +163,81 @@ quidToNatural :: Quid -> Natural
 quidToNatural = unQuid
 
 --------------------------------------------------------------------------------
--- Quid characters
+-- Uppercase Latin characters
 --------------------------------------------------------------------------------
 
-data QuidChar
+data UppercaseLatinChar
     = A | B | C | D | E | F | G | H | I | J | K | L | M
     | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
     deriving (Bounded, Enum, Eq, Ord, Read, Show)
 
 --------------------------------------------------------------------------------
--- Generation and shrinking of arbitrary quid characters
+-- Generation and shrinking of arbitrary uppercase Latin characters
 --------------------------------------------------------------------------------
 
-arbitraryQuidChar :: Gen QuidChar
-arbitraryQuidChar = arbitraryBoundedEnum
+arbitraryUppercaseLatinChar :: Gen UppercaseLatinChar
+arbitraryUppercaseLatinChar = arbitraryBoundedEnum
 
-shrinkQuidChar :: QuidChar -> [QuidChar]
-shrinkQuidChar = shrinkMap toEnum fromEnum
-
---------------------------------------------------------------------------------
--- Conversion between quid characters and ordinary characters
---------------------------------------------------------------------------------
-
-quidCharFromChar :: Char -> Maybe QuidChar
-quidCharFromChar c = readMaybe [c]
-
-quidCharToChar :: QuidChar -> Char
-quidCharToChar = head . show
+shrinkUppercaseLatinChar :: UppercaseLatinChar -> [UppercaseLatinChar]
+shrinkUppercaseLatinChar = shrinkMap toEnum fromEnum
 
 --------------------------------------------------------------------------------
--- Quid strings
+-- Conversion between uppercase Latin characters and ordinary characters
 --------------------------------------------------------------------------------
 
-newtype QuidString = QuidString
-    { unQuidString :: NonEmpty QuidChar }
+uppercaseLatinCharFromChar :: Char -> Maybe UppercaseLatinChar
+uppercaseLatinCharFromChar c = readMaybe [c]
+
+uppercaseLatinCharToChar :: UppercaseLatinChar -> Char
+uppercaseLatinCharToChar = head . show
+
+--------------------------------------------------------------------------------
+-- Uppercase Latin strings
+--------------------------------------------------------------------------------
+
+newtype UppercaseLatinString = UppercaseLatinString
+    { unUppercaseLatinString :: NonEmpty UppercaseLatinChar }
     deriving (Eq, Ord)
 
 --------------------------------------------------------------------------------
--- Conversion between quid strings and ordinary strings
+-- Conversion between uppercase Latin strings and ordinary strings
 --------------------------------------------------------------------------------
 
-instance Read QuidString where
+instance Read UppercaseLatinString where
     readPrec = do
         many (skipChar ' ')
-        QuidString <$> ((:|) <$> readChar <*> many readChar)
+        UppercaseLatinString <$> ((:|) <$> readChar <*> many readChar)
       where
-        readChar :: ReadPrec QuidChar
-        readChar = readCharMaybe quidCharFromChar
+        readChar :: ReadPrec UppercaseLatinChar
+        readChar = readCharMaybe uppercaseLatinCharFromChar
 
-instance Show QuidString where
-    show (QuidString cs) = F.foldMap show cs
-
---------------------------------------------------------------------------------
--- Generation of arbitrary quid strings
---------------------------------------------------------------------------------
-
-arbitraryQuidString :: Int -> Gen QuidString
-arbitraryQuidString stringLen =
-    QuidString . NE.fromList <$> replicateM (max 1 stringLen) arbitraryQuidChar
+instance Show UppercaseLatinString where
+    show (UppercaseLatinString cs) = F.foldMap show cs
 
 --------------------------------------------------------------------------------
--- Conversion between quid strings and quids
+-- Generation of arbitrary uppercase Latin strings
 --------------------------------------------------------------------------------
 
-quidStringToQuid :: QuidString -> Quid
-quidStringToQuid (QuidString xs) = Quid $
+arbitraryUppercaseLatinString :: Int -> Gen UppercaseLatinString
+arbitraryUppercaseLatinString stringLen =
+    UppercaseLatinString . NE.fromList <$>
+    replicateM (max 1 stringLen) arbitraryUppercaseLatinChar
+
+--------------------------------------------------------------------------------
+-- Conversion between uppercase Latin strings and quids
+--------------------------------------------------------------------------------
+
+uppercaseLatinStringToQuid :: UppercaseLatinString -> Quid
+uppercaseLatinStringToQuid (UppercaseLatinString xs) = Quid $
     F.foldl' f 0 xs - 1
   where
     f !acc !x = acc * 26 + 1 + fromIntegral (fromEnum x)
 
-quidStringFromQuid :: Quid -> QuidString
-quidStringFromQuid (Quid n) =
-    QuidString . NE.fromList $ go [] n
+uppercaseLatinStringFromQuid :: Quid -> UppercaseLatinString
+uppercaseLatinStringFromQuid (Quid n) =
+    UppercaseLatinString . NE.fromList $ go [] n
   where
-    go :: [QuidChar] -> Natural -> [QuidChar]
+    go :: [UppercaseLatinChar] -> Natural -> [UppercaseLatinChar]
     go !acc !n
         | n < 26 =
             toEnum (fromIntegral n) : acc

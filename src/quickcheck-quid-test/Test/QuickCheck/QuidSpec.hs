@@ -77,10 +77,6 @@ import qualified Data.Set as Set
 import qualified Data.Text.Lazy as TL
 import qualified Test.QuickCheck.Classes as Laws
 
--- TODO
--- Relationships between strings of A and naturals
--- Relationships between strings of Z and naturals
-
 spec :: Spec
 spec = do
 
@@ -119,7 +115,7 @@ spec = do
             property prop_shrinkQuid_unique
 
     parallel $ describe "Unit tests" $ do
-        unitTests_show_quidFromNatural
+        unitTests_show_uppercaseLatin_quidFromNatural
 
 --------------------------------------------------------------------------------
 -- Uniformity
@@ -271,9 +267,9 @@ prop_shrinkQuid_unique (Width256 q) =
 -- Unit tests
 --------------------------------------------------------------------------------
 
-unitTests_show_quidFromNatural :: Spec
-unitTests_show_quidFromNatural = unitTests
-    "unitTests_show_quidFromNatural"
+unitTests_show_uppercaseLatin_quidFromNatural :: Spec
+unitTests_show_uppercaseLatin_quidFromNatural = unitTests
+    "unitTests_show_uppercaseLatin_quidFromNatural"
     (show . UppercaseLatin . quidFromNatural)
     (mkTest <$> tests)
   where
