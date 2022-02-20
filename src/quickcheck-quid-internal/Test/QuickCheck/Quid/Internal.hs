@@ -303,8 +303,17 @@ shrinkNatural n
 -- Utilities
 --------------------------------------------------------------------------------
 
-frequencies :: (Foldable f, Ord k) => f k -> [(k, Int)]
+newtype Frequency = Frequency {unFrequency :: Natural}
+    deriving (Eq, Ord, Show)
+
+instance Semigroup Frequency where
+    Frequency f1 <> Frequency f2 = Frequency (f1 + f2)
+
+instance Monoid Frequency where
+    mempty = Frequency 1
+
+frequencies :: (Foldable f, Ord k) => f k -> [(k, Frequency)]
 frequencies
     = L.sortOn ((Down . snd) &&& fst)
     . Map.toList
-    . L.foldr (flip (Map.insertWith (+)) 1) Map.empty
+    . L.foldr (flip (Map.insertWith (<>)) mempty) Map.empty
