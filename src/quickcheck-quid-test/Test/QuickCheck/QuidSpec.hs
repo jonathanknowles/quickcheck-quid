@@ -1,7 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DerivingVia #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -91,6 +90,12 @@ spec = do
             ]
         testLawsMany @(Prefix "test-prefix:" Int)
             [ Laws.showLaws
+            , Laws.showReadLaws
+            ]
+        testLawsMany @TestId
+            [ Laws.eqLaws
+            , Laws.ordLaws
+            , Laws.showLaws
             , Laws.showReadLaws
             ]
 
@@ -302,7 +307,7 @@ frequencies
 newtype TestId = TestId Quid
     deriving (Eq, Ord)
     deriving Arbitrary via (Size 256 Quid)
-    deriving Show via (Prefix "test-id:" (Chunk 4 "-" (Latin Quid)))
+    deriving (Read, Show) via (Prefix "test-id:" (Latin Quid))
 
 --------------------------------------------------------------------------------
 -- Arbitrary instances
