@@ -34,11 +34,13 @@ import Test.QuickCheck
     , Gen
     , Property
     , checkCoverage
+    , choose
     , conjoin
     , counterexample
     , cover
     , forAll
     , forAllBlind
+    , frequency
     , label
     , property
     , shrinkMapBy
@@ -49,19 +51,25 @@ import Test.QuickCheck
     )
 import Test.QuickCheck.Classes.Hspec
     ( testLawsMany )
-import Test.QuickCheck.Quid
-    ( Quid, arbitraryQuid, shrinkQuid )
 import Test.QuickCheck.Quid.Internal
     ( Chunked (..)
+    , Frequency (..)
     , Prefix (..)
+    , Quid
     , Size (..)
     , UppercaseLatin (..)
     , arbitraryNatural
+    , arbitraryQuid
+    , frequencies
     , quidFromNatural
+    , quidToNatural
     , shrinkNatural
+    , shrinkQuid
     )
 import Text.Pretty.Simple
     ( pShow )
+import Text.Printf
+    ( printf )
 
 import qualified Data.List as L
 import qualified Data.Map.Strict as Map
@@ -117,41 +125,76 @@ spec = do
 -- Uniformity
 --------------------------------------------------------------------------------
 
-prop_arbitraryQuid_uniform :: Property
-prop_arbitraryQuid_uniform =
-    withMaxSuccess 1 $
-    forAll generateFrequencies $ \(m, (c1, f1), (c2, f2)) ->
-        conjoin
-            [ all (`Map.member` m) ['A' .. 'Z']
-            , f1 % f2 > 90 % 100
-            , f2 % f1 > 90 % 100
-            ]
+newtype SizeExponent = SizeExponent {unSizeExponent :: Int}
+    deriving (Eq, Ord, Show)
+
+instance Arbitrary SizeExponent where
+    arbitrary = SizeExponent <$> frequency
+        [ (1, pure 0)
+        , (1, pure 256)
+        , (16, choose (1, 255))
+        ]
+    shrink = shrinkMapBy SizeExponent unSizeExponent shrink
+
+prop_arbitraryQuid_uniform :: SizeExponent -> Property
+prop_arbitraryQuid_uniform (SizeExponent sizeExponent) =
+    forAllBlind arbitraryQuids prop
   where
-    generateFrequencies :: Gen (Map Char Int, (Char, Int), (Char, Int))
-    generateFrequencies = do
-        quids <- fmap unSized <$> replicateM 1_000_000 (arbitrary @(Sized Quid))
-        let charFrequencies = charFrequenciesOfQuids quids
-        pure
-            ( charFrequencies
-            , smallestCharFrequency charFrequencies
-            , greatestCharFrequency charFrequencies
-            )
+    arbitraryQuids :: Gen [Quid]
+    arbitraryQuids = replicateM arbitraryQuidCount (arbitraryQuid sizeExponent)
 
-    greatestCharFrequency :: Map Char Int -> (Char, Int)
-    greatestCharFrequency = head . L.sortOn (Down . snd) . Map.toList
+    arbitraryQuidCount :: Int
+    arbitraryQuidCount = bucketCount * 256
 
-    smallestCharFrequency :: Map Char Int -> (Char, Int)
-    smallestCharFrequency = head . L.sortOn snd . Map.toList
+    bucketCount :: Int
+    bucketCount = fromIntegral $ min 256 size
 
-    charFrequenciesOfQuid :: Quid -> Map Char Int
-    charFrequenciesOfQuid q = foldr
-        (\c m -> Map.insertWith (+) c 1 m)
-        Map.empty
-        (filter (/= '-') (show (UppercaseLatin q)))
+    bucketSize :: Natural
+    bucketSize = max 1 (size `div` fromIntegral bucketCount)
 
-    charFrequenciesOfQuids :: [Quid] -> Map Char Int
-    charFrequenciesOfQuids qs =
-        Map.unionsWith (+) (charFrequenciesOfQuid <$> qs)
+    size :: Natural
+    size = 2 ^ fromIntegral sizeExponent
+
+    prop :: [Quid] -> Property
+    prop quids =
+        label labelSizeBucketCount $
+        counterexample (unwords . words $ labelSizeBucketCount) $
+        conjoin
+            [ occupiedBucketCount == bucketCount
+            , occupiedBucketFrequencyGreatestToSmallestRatio >= 1
+            , occupiedBucketFrequencyGreatestToSmallestRatio <= 2
+            ]
+      where
+        labelSizeBucketCount :: String
+        labelSizeBucketCount = mconcat
+            [ "(size exponent = "
+            , printf "% 4d" sizeExponent
+            , ", arbitrary quid count = "
+            , printf "% 6d" arbitraryQuidCount
+            , ", bucket count = "
+            , printf "% 4d" bucketCount
+            , ", occupied bucket count = "
+            , printf "% 4d" occupiedBucketCount
+            , ")"
+            ]
+
+        occupiedBuckets :: [Natural]
+        occupiedBuckets = quidToBucket <$> quids
+
+        occupiedBucketFrequencies :: [(Natural, Frequency)]
+        occupiedBucketFrequencies = frequencies occupiedBuckets
+
+        occupiedBucketCount :: Int
+        occupiedBucketCount = length occupiedBucketFrequencies
+
+        quidToBucket :: Quid -> Natural
+        quidToBucket = (`div` fromIntegral bucketSize) . quidToNatural
+
+        occupiedBucketFrequencyGreatestToSmallestRatio = (%)
+            (unFrequency bucketFrequencyGreatest)
+            (unFrequency bucketFrequencySmallest)
+        bucketFrequencyGreatest = snd $ head occupiedBucketFrequencies
+        bucketFrequencySmallest = snd $ last occupiedBucketFrequencies
 
 --------------------------------------------------------------------------------
 -- Uniqueness
