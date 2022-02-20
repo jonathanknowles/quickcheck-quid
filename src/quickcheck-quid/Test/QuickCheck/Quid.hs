@@ -1,18 +1,6 @@
 module Test.QuickCheck.Quid
-    ( Quid
-    , arbitraryQuid
-    , chooseQuid
-    , coarbitraryQuid
-    , functionQuid
-    , shrinkQuid
-    )
+    ( Quid )
     where
 
 import Internal.Test.QuickCheck.Quid
-    ( Quid
-    , arbitraryQuid
-    , chooseQuid
-    , coarbitraryQuid
-    , functionQuid
-    , shrinkQuid
-    )
+    ( Quid )
