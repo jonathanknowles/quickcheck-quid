@@ -36,6 +36,7 @@ library quickcheck-quid-internal
         Internal.Test.QuickCheck.Quid
         Internal.Test.QuickCheck.Quid.Combinators.Chunk
         Internal.Test.QuickCheck.Quid.Combinators.Prefix
+        Internal.Test.QuickCheck.Quid.Combinators.Size
         Internal.Test.QuickCheck.Quid.Representations.Latin
     default-language:
         Haskell2010

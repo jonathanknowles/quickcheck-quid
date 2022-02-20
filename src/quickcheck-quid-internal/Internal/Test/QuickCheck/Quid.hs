@@ -76,17 +76,6 @@ newtype Quid = Quid
     deriving (Data, Eq, Generic, Hashable, NFData, Ord, Read, Show)
 
 --------------------------------------------------------------------------------
--- Sizes
---------------------------------------------------------------------------------
-
-newtype Size (n :: Nat) a = Size { unSize :: a }
-    deriving (Data, Eq, Generic, Hashable, NFData, Ord)
-
-instance (Arbitrary a, KnownNat n) => Arbitrary (Size n a) where
-    arbitrary = Size <$> resize (fromIntegral $ natVal $ Proxy @n) arbitrary
-    shrink = shrinkMapBy Size unSize shrink
-
---------------------------------------------------------------------------------
 -- Generation and shrinking of arbitrary quids
 --------------------------------------------------------------------------------
 
