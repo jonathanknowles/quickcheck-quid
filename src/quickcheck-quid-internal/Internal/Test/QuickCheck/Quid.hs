@@ -11,7 +11,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Test.QuickCheck.Quid.Internal
+module Internal.Test.QuickCheck.Quid
     where
 
 import Control.Applicative

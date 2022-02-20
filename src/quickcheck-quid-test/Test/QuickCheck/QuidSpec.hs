@@ -25,6 +25,21 @@ import Data.Ratio
     ( (%) )
 import Data.Set
     ( Set )
+import Internal.Test.QuickCheck.Quid
+    ( Chunked (..)
+    , Frequency (..)
+    , Prefix (..)
+    , Quid
+    , Size (..)
+    , UppercaseLatin (..)
+    , arbitraryNatural
+    , arbitraryQuid
+    , frequencies
+    , quidFromNatural
+    , quidToNatural
+    , shrinkNatural
+    , shrinkQuid
+    )
 import Numeric.Natural
     ( Natural )
 import Test.Hspec
@@ -51,21 +66,6 @@ import Test.QuickCheck
     )
 import Test.QuickCheck.Classes.Hspec
     ( testLawsMany )
-import Test.QuickCheck.Quid.Internal
-    ( Chunked (..)
-    , Frequency (..)
-    , Prefix (..)
-    , Quid
-    , Size (..)
-    , UppercaseLatin (..)
-    , arbitraryNatural
-    , arbitraryQuid
-    , frequencies
-    , quidFromNatural
-    , quidToNatural
-    , shrinkNatural
-    , shrinkQuid
-    )
 import Text.Pretty.Simple
     ( pShow )
 import Text.Printf

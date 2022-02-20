@@ -8,7 +8,7 @@ module Test.QuickCheck.Quid
     )
     where
 
-import Test.QuickCheck.Quid.Internal
+import Internal.Test.QuickCheck.Quid
     ( Quid
     , arbitraryQuid
     , chooseQuid
