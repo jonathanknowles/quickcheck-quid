@@ -88,10 +88,6 @@ spec = do
             [ Laws.eqLaws
             , Laws.ordLaws
             ]
-        testLawsMany @(Prefix "test-prefix:" Int)
-            [ Laws.showLaws
-            , Laws.showReadLaws
-            ]
         testLawsMany @TestId
             [ Laws.eqLaws
             , Laws.ordLaws
@@ -312,10 +308,6 @@ newtype TestId = TestId Quid
 --------------------------------------------------------------------------------
 -- Arbitrary instances
 --------------------------------------------------------------------------------
-
-instance Arbitrary a => Arbitrary (Prefix p a) where
-    arbitrary = Prefix <$> arbitrary
-    shrink = shrinkMapBy Prefix unPrefix shrink
 
 instance Arbitrary Quid where
     arbitrary = arbitraryQuid

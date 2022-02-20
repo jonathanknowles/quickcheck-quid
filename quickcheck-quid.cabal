@@ -57,6 +57,7 @@ test-suite quickcheck-quid-test
     other-modules:
         Test.QuickCheck.Classes.Hspec
         Test.QuickCheck.QuidSpec
+        Test.QuickCheck.Quid.Combinators.PrefixSpec
         Test.QuickCheck.Quid.Representations.LatinSpec
     type: exitcode-stdio-1.0
     default-language:
