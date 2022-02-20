@@ -50,8 +50,10 @@ import Test.QuickCheck
     , coarbitraryShow
     , functionShow
     , frequency
+    , resize
     , shrinkMap
     , shrinkMapBy
+    , sized
     )
 import Test.QuickCheck.Function
     ( (:->) )
@@ -81,15 +83,15 @@ newtype Size (n :: Nat) a = Size { unSize :: a }
     deriving (Data, Eq, Generic, Hashable, NFData, Ord)
 
 instance KnownNat n => Arbitrary (Size n Quid) where
-    arbitrary = Size <$> arbitraryQuid (fromIntegral $ natVal $ Proxy @n)
+    arbitrary = Size <$> resize (fromIntegral $ natVal $ Proxy @n) arbitraryQuid
     shrink = shrinkMapBy Size unSize shrinkQuid
 
 --------------------------------------------------------------------------------
 -- Generation and shrinking of arbitrary quids
 --------------------------------------------------------------------------------
 
-arbitraryQuid :: Int -> Gen Quid
-arbitraryQuid i = chooseQuid (Quid 0, Quid $ (2 ^ max 0 i) - 1)
+arbitraryQuid :: Gen Quid
+arbitraryQuid = sized $ \i -> chooseQuid (Quid 0, Quid $ (2 ^ max 0 i) - 1)
 
 chooseQuid :: (Quid, Quid) -> Gen Quid
 chooseQuid (Quid n1, Quid n2) = Quid <$> chooseNatural (n1, n2)

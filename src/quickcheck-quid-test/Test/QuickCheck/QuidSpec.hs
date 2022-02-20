@@ -59,6 +59,7 @@ import Test.QuickCheck
     , frequency
     , label
     , property
+    , resize
     , shrinkMapBy
     , shrinkNothing
     , sized
@@ -82,7 +83,7 @@ spec :: Spec
 spec = do
 
     parallel $ describe "Lawfulness of type class instances" $ do
-        testLawsMany @(Sized Quid)
+        testLawsMany @Quid
             [ Laws.eqLaws
             , Laws.ordLaws
             ]
@@ -131,7 +132,8 @@ prop_arbitraryQuid_uniform (SizeExponent sizeExponent) =
     forAllBlind arbitraryQuids prop
   where
     arbitraryQuids :: Gen [Quid]
-    arbitraryQuids = replicateM arbitraryQuidCount (arbitraryQuid sizeExponent)
+    arbitraryQuids = replicateM arbitraryQuidCount $
+        resize sizeExponent arbitraryQuid
 
     arbitraryQuidCount :: Int
     arbitraryQuidCount = bucketCount * 256
@@ -208,8 +210,8 @@ prop_shrinkQuid_lessThan :: Width256 Quid -> Property
 prop_shrinkQuid_lessThan (Width256 q) =
     property $ all (< q) (shrinkQuid q)
 
-prop_shrinkQuid_minimalElement :: Sized Quid -> Property
-prop_shrinkQuid_minimalElement (Sized q) =
+prop_shrinkQuid_minimalElement :: Quid -> Property
+prop_shrinkQuid_minimalElement q =
     checkCoverage $
     cover 10 (q /= minimalQuid) "q /= minimalQuid" $
     case shrinkQuid q of
@@ -308,23 +310,13 @@ instance Arbitrary a => Arbitrary (Prefix p a) where
     arbitrary = Prefix <$> arbitrary
     shrink = shrinkMapBy Prefix unPrefix shrink
 
-newtype Sized a = Sized { unSized :: a }
-    deriving newtype (Eq, Ord, Read, Show)
-
 newtype Width256 a = Width256 { unWidth256 :: a }
     deriving newtype (Eq, Ord, Read, Show)
 
-instance Arbitrary (Sized Quid) where
-    arbitrary = Sized <$> sized arbitraryQuid
-    shrink = shrinkMapBy Sized unSized shrinkQuid
-
-instance Arbitrary (Sized (Latin Quid)) where
-    arbitrary = Sized . Latin <$> sized arbitraryQuid
-    shrink = shrinkMapBy
-        (Sized . Latin)
-        (unLatin . unSized)
-        shrinkQuid
+instance Arbitrary Quid where
+    arbitrary = arbitraryQuid
+    shrink = shrinkQuid
 
 instance Arbitrary (Width256 Quid) where
-    arbitrary = Width256 <$> arbitraryQuid 256
+    arbitrary = Width256 <$> resize 256 arbitraryQuid
     shrink = shrinkMapBy Width256 unWidth256 shrinkQuid

@@ -31,7 +31,7 @@ spec :: Spec
 spec = do
 
     parallel $ describe "Lawfulness of type class instances" $ do
-        testLawsMany @(Sized (Latin Quid))
+        testLawsMany @(Latin Quid)
             [ Laws.showLaws
             , Laws.showReadLaws
             ]
@@ -134,12 +134,6 @@ instance Show a => Show (Pretty a) where
 -- Arbitrary instances
 --------------------------------------------------------------------------------
 
-newtype Sized a = Sized { unSized :: a }
-    deriving newtype (Eq, Ord, Read, Show)
-
-instance Arbitrary (Sized (Latin Quid)) where
-    arbitrary = Sized . Latin <$> sized arbitraryQuid
-    shrink = shrinkMapBy
-        (Sized . Latin)
-        (unLatin . unSized)
-        shrinkQuid
+instance Arbitrary (Latin Quid) where
+    arbitrary = Latin <$> arbitraryQuid
+    shrink = shrinkMapBy Latin unLatin shrinkQuid
