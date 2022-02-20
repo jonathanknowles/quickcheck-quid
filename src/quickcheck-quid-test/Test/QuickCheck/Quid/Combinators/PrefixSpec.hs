@@ -1,6 +1,5 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -24,7 +23,19 @@ spec :: Spec
 spec = do
 
     parallel $ describe "Lawfulness of type class instances" $ do
+        testLawsMany @(Prefix "A" Int)
+            [ Laws.showLaws
+            , Laws.showReadLaws
+            ]
         testLawsMany @(Prefix ":" Int)
+            [ Laws.showLaws
+            , Laws.showReadLaws
+            ]
+        testLawsMany @(Prefix "1" Int)
+            [ Laws.showLaws
+            , Laws.showReadLaws
+            ]
+        testLawsMany @(Prefix "test-prefix:" Int)
             [ Laws.showLaws
             , Laws.showReadLaws
             ]
