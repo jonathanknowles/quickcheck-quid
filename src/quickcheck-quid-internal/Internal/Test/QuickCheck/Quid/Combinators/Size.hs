@@ -29,7 +29,7 @@ import Test.QuickCheck
 --------------------------------------------------------------------------------
 
 newtype Size (n :: Nat) a = Size { unSize :: a }
-    deriving (Data, Eq, Generic, Hashable, NFData, Ord)
+    deriving (Data, Eq, Generic, Hashable, NFData, Ord, Read, Show)
 
 instance (Arbitrary a, KnownNat n) => Arbitrary (Size n a) where
     arbitrary = Size <$> resize (fromIntegral $ natVal $ Proxy @n) arbitrary

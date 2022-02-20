@@ -48,6 +48,7 @@ import Test.Hspec
     ( Spec, describe, it, parallel )
 import Test.QuickCheck
     ( Arbitrary (..)
+    , Fixed (..)
     , Gen
     , Property
     , checkCoverage
@@ -196,19 +197,19 @@ prop_arbitraryQuid_uniform (SizeExponent sizeExponent) =
 prop_arbitraryQuid_unique :: Property
 prop_arbitraryQuid_unique =
     withMaxSuccess 1 $
-    forAllBlind arbitraryFixedWidthQuids $ \uids ->
+    forAllBlind arbitraryFixedSizeQuids $ \uids ->
         Set.size (Set.fromList uids) === L.length uids
   where
-    arbitraryFixedWidthQuids :: Gen [Quid]
-    arbitraryFixedWidthQuids = fmap unWidth256 <$>
-        replicateM 1_000_000 (arbitrary @(Width256 Quid))
+    arbitraryFixedSizeQuids :: Gen [Quid]
+    arbitraryFixedSizeQuids = fmap (unSize . getFixed) <$>
+        replicateM 1_000_000 (arbitrary @(Fixed (Size 256 Quid)))
 
 --------------------------------------------------------------------------------
 -- Shrinkability
 --------------------------------------------------------------------------------
 
-prop_shrinkQuid_lessThan :: Width256 Quid -> Property
-prop_shrinkQuid_lessThan (Width256 q) =
+prop_shrinkQuid_lessThan :: Size 256 Quid -> Property
+prop_shrinkQuid_lessThan (Size q) =
     property $ all (< q) (shrinkQuid q)
 
 prop_shrinkQuid_minimalElement :: Quid -> Property
@@ -221,7 +222,7 @@ prop_shrinkQuid_minimalElement q =
   where
     minimalQuid = quidFromNatural 0
 
-prop_shrinkQuid_minimalSet :: [Width256 Quid] -> Property
+prop_shrinkQuid_minimalSet :: [Size 256 Quid] -> Property
 prop_shrinkQuid_minimalSet qs =
     label (show $ bucket expectedSize) $
     counterexample (show expectedSize) $
@@ -244,18 +245,18 @@ prop_shrinkQuid_minimalSet qs =
     expectedSize = L.length qs
 
     minimalSet :: Set Quid
-    minimalSet = Set.map unWidth256 $ fromMaybe
+    minimalSet = Set.map unSize $ fromMaybe
         (error "Cannot shrink to minimal set")
         (shrinkWhile ((>= expectedSize) . Set.size) shrink (Set.fromList qs))
 
-prop_shrinkQuid_ordered :: Width256 Quid -> Property
-prop_shrinkQuid_ordered (Width256 q) =
+prop_shrinkQuid_ordered :: Size 256 Quid -> Property
+prop_shrinkQuid_ordered (Size q) =
     L.sort shrunkValues === shrunkValues
   where
     shrunkValues = shrinkQuid q
 
-prop_shrinkQuid_unique :: Width256 Quid -> Property
-prop_shrinkQuid_unique (Width256 q) =
+prop_shrinkQuid_unique :: Size 256 Quid -> Property
+prop_shrinkQuid_unique (Size q) =
     Set.size (Set.fromList shrunkValues) === L.length shrunkValues
   where
     shrunkValues = shrinkQuid q
@@ -311,13 +312,6 @@ instance Arbitrary a => Arbitrary (Prefix p a) where
     arbitrary = Prefix <$> arbitrary
     shrink = shrinkMapBy Prefix unPrefix shrink
 
-newtype Width256 a = Width256 { unWidth256 :: a }
-    deriving newtype (Eq, Ord, Read, Show)
-
 instance Arbitrary Quid where
     arbitrary = arbitraryQuid
     shrink = shrinkQuid
-
-instance Arbitrary (Width256 Quid) where
-    arbitrary = Width256 <$> resize 256 arbitraryQuid
-    shrink = shrinkMapBy Width256 unWidth256 shrinkQuid
