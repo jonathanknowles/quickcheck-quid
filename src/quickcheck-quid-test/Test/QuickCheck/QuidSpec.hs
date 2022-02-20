@@ -31,7 +31,6 @@ import Internal.Test.QuickCheck.Quid
     , Prefix (..)
     , Quid
     , Size (..)
-    , UppercaseLatin (..)
     , arbitraryNatural
     , arbitraryQuid
     , frequencies
@@ -40,6 +39,8 @@ import Internal.Test.QuickCheck.Quid
     , shrinkNatural
     , shrinkQuid
     )
+import Internal.Test.QuickCheck.Quid.Representations.UppercaseLatin
+    ( UppercaseLatin (..) )
 import Numeric.Natural
     ( Natural )
 import Test.Hspec
