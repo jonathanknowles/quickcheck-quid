@@ -1,0 +1,13 @@
+cradle:
+  cabal:
+    - path: "src/quickcheck-quid"
+      component: "lib:quickcheck-quid"
+
+    - path: "src/quickcheck-quid-example"
+      component: "quickcheck-quid:lib:quickcheck-quid-example"
+
+    - path: "src/quickcheck-quid-internal"
+      component: "quickcheck-quid:lib:quickcheck-quid-internal"
+
+    - path: "src/quickcheck-quid-test"
+      component: "quickcheck-quid:test:quickcheck-quid-test"
