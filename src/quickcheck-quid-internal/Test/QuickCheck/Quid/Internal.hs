@@ -31,7 +31,7 @@ import Data.Hashable
 import Data.List.Extra
     ( chunksOf )
 import Data.List.NonEmpty
-    ( NonEmpty )
+    ( NonEmpty (..) )
 import Data.Map.Strict
     ( Map )
 import Data.Maybe
@@ -206,18 +206,10 @@ newtype QuidString = QuidString
 instance Read QuidString where
     readPrec = do
         many (skipChar ' ')
-        blocks <- many readBlock
-        terminator <- readTerminator
-        pure $ QuidString $ NE.fromList $ foldr (<>) terminator blocks
+        QuidString <$> ((:|) <$> readChar <*> many readChar)
       where
-        readBlock :: ReadPrec [QuidChar]
-        readBlock = replicateM 4 readChar <* skipChar '-'
-
         readChar :: ReadPrec QuidChar
         readChar = readCharMaybe quidCharFromChar
-
-        readTerminator :: ReadPrec [QuidChar]
-        readTerminator = choice $ (`replicateM` readChar) <$> [4, 3, 2, 1]
 
 instance Show QuidString where
     show (QuidString cs) = F.foldMap show cs
