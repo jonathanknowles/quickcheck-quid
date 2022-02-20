@@ -27,8 +27,6 @@ import Data.Either.Extra
     ( eitherToMaybe )
 import Data.Hashable
     ( Hashable (..) )
-import Data.List.Extra
-    ( chunksOf )
 import Data.List.NonEmpty
     ( NonEmpty (..) )
 import Data.Map.Strict
@@ -78,19 +76,6 @@ import qualified Test.QuickCheck as QC
 newtype Quid = Quid
     { unQuid :: Natural }
     deriving (Data, Eq, Generic, Hashable, NFData, Ord, Read, Show)
-
---------------------------------------------------------------------------------
--- Chunking
---------------------------------------------------------------------------------
-
-newtype Chunked (n :: Nat) (s :: Symbol) a = Chunked { unChunked :: a }
-    deriving (Data, Eq, Generic, Hashable, NFData, Ord)
-
-instance (KnownNat n, KnownSymbol s, Show a) => Show (Chunked n s a) where
-    show (Chunked a)
-        = L.intercalate (symbolVal (Proxy @s))
-        $ chunksOf (fromIntegral $ natVal $ Proxy @n)
-        $ show a
 
 --------------------------------------------------------------------------------
 -- Prefixes

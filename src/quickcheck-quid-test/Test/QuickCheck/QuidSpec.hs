@@ -25,8 +25,7 @@ import Data.Ratio
 import Data.Set
     ( Set )
 import Internal.Test.QuickCheck.Quid
-    ( Chunked (..)
-    , Frequency (..)
+    ( Frequency (..)
     , Prefix (..)
     , Quid
     , Size (..)
@@ -38,6 +37,8 @@ import Internal.Test.QuickCheck.Quid
     , shrinkNatural
     , shrinkQuid
     )
+import Internal.Test.QuickCheck.Quid.Combinators.Chunked
+    ( Chunked (..) )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
     ( Latin (..) )
 import Numeric.Natural

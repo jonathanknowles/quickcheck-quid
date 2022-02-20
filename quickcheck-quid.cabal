@@ -34,6 +34,7 @@ library quickcheck-quid-internal
         src/quickcheck-quid-internal
     exposed-modules:
         Internal.Test.QuickCheck.Quid
+        Internal.Test.QuickCheck.Quid.Combinators.Chunked
         Internal.Test.QuickCheck.Quid.Representations.Latin
     default-language:
         Haskell2010
