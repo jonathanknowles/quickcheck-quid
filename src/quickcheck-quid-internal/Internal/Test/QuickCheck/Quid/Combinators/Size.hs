@@ -22,14 +22,14 @@ import GHC.Generics
 import GHC.TypeLits
     ( KnownNat, KnownSymbol, Nat, Symbol, natVal, symbolVal )
 import Test.QuickCheck
-    ( Arbitrary (..), resize, shrinkMapBy )
+    ( Arbitrary (..), CoArbitrary, Function, resize, shrinkMapBy )
 
 --------------------------------------------------------------------------------
 -- Sizes
 --------------------------------------------------------------------------------
 
 newtype Size (n :: Nat) a = Size { unSize :: a }
-    deriving (Data, Eq, Generic, Hashable, NFData, Ord, Read, Show)
+    deriving (CoArbitrary, Data, Eq, Generic, Hashable, NFData, Ord, Read, Show)
 
 instance (Arbitrary a, KnownNat n) => Arbitrary (Size n a) where
     arbitrary = Size <$> resize (fromIntegral $ natVal $ Proxy @n) arbitrary

@@ -29,6 +29,18 @@ library
         base >=4.7 && <5
       , quickcheck-quid-internal
 
+library quickcheck-quid-example
+    hs-source-dirs:
+        src/quickcheck-quid-example
+    exposed-modules:
+        Test.QuickCheck.Quid.Example
+    default-language:
+        Haskell2010
+    build-depends:
+        QuickCheck
+      , base >=4.7 && <5
+      , quickcheck-quid
+
 library quickcheck-quid-internal
     hs-source-dirs:
         src/quickcheck-quid-internal

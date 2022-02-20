@@ -1,22 +1,22 @@
 module Test.QuickCheck.Quid
     (
     -- * The Quid type
-      Quid
+      Quid (..)
 
     -- * Combinators
-    , Prefix
-    , Size
+    , Prefix (..)
+    , Size (..)
 
     -- * Representations
-    , Latin
+    , Latin (..)
     )
     where
 
 import Internal.Test.QuickCheck.Quid
-    ( Quid )
+    ( Quid (..) )
 import Internal.Test.QuickCheck.Quid.Combinators.Prefix
-    ( Prefix )
+    ( Prefix (..) )
 import Internal.Test.QuickCheck.Quid.Combinators.Size
-    ( Size )
+    ( Size (..) )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
-    ( Latin )
+    ( Latin (..) )
