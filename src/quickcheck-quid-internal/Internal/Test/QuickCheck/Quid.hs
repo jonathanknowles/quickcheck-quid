@@ -4,9 +4,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -116,31 +114,6 @@ quidFromNatural = Quid
 
 quidToNatural :: Quid -> Natural
 quidToNatural = unQuid
-
---------------------------------------------------------------------------------
--- Reading suppport
---------------------------------------------------------------------------------
-
-readCharMaybe :: (Char -> Maybe a) -> ReadPrec a
-readCharMaybe f = look >>= \case
-    a : _ | Just c <- f a ->
-        get >> pure c
-    _ ->
-        pfail
-
-skipString :: String -> ReadPrec ()
-skipString stringToSkip = do
-    remainder <- look
-    if stringToSkip `L.isPrefixOf` remainder
-    then replicateM_ (length stringToSkip) get
-    else pfail
-
-skipChar :: Char -> ReadPrec ()
-skipChar charToSkip = readCharMaybe
-    (\char -> if char == charToSkip then Just () else Nothing)
-
-readWith :: (String -> Maybe a) -> (Int -> String -> [(a, String)])
-readWith f _ = maybe [] (pure . (, "")) . f
 
 --------------------------------------------------------------------------------
 -- Natural number support
