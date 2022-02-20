@@ -304,11 +304,3 @@ newtype TestId = TestId Quid
     deriving (Eq, Ord)
     deriving Arbitrary via (Size 256 Quid)
     deriving (Read, Show) via (Prefix "test-id:" (Latin Quid))
-
---------------------------------------------------------------------------------
--- Arbitrary instances
---------------------------------------------------------------------------------
-
-instance Arbitrary Quid where
-    arbitrary = arbitraryQuid
-    shrink = shrinkQuid

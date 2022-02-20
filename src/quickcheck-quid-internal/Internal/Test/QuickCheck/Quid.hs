@@ -43,6 +43,7 @@ import Numeric.Natural
     ( Natural )
 import Test.QuickCheck
     ( Arbitrary (..)
+    , CoArbitrary (..)
     , Function (..)
     , Gen
     , arbitraryBoundedEnum
@@ -74,6 +75,16 @@ import qualified Test.QuickCheck as QC
 newtype Quid = Quid
     { unQuid :: Natural }
     deriving (Data, Eq, Generic, Hashable, NFData, Ord, Read, Show)
+
+instance Arbitrary Quid where
+    arbitrary = arbitraryQuid
+    shrink = shrinkQuid
+
+instance CoArbitrary Quid where
+    coarbitrary = coarbitraryQuid
+
+instance Function Quid where
+    function = functionQuid
 
 --------------------------------------------------------------------------------
 -- Generation and shrinking of arbitrary quids
