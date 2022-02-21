@@ -5,7 +5,7 @@ module Internal.Text.Read where
 import Control.Monad
     ( replicateM_ )
 import Text.Read
-    ( ReadPrec (..), get, look, pfail )
+    ( ReadPrec, get, look, pfail )
 
 import qualified Data.List as L
 

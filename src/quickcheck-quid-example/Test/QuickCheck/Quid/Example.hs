@@ -7,8 +7,6 @@ module Test.QuickCheck.Quid.Example where
 
 import GHC.Generics
     ( Generic )
-import Numeric.Natural
-    ( Natural )
 import Test.QuickCheck
     ( Arbitrary
     , CoArbitrary

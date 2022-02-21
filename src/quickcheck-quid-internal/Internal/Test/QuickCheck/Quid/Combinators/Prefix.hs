@@ -3,7 +3,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -11,11 +10,11 @@ module Internal.Test.QuickCheck.Quid.Combinators.Prefix
     where
 
 import Control.Applicative
-    ( many, (<|>) )
+    ( many )
 import Control.DeepSeq
     ( NFData )
 import Control.Monad
-    ( replicateM_ )
+    ( void )
 import Data.Data
     ( Data )
 import Data.Hashable
@@ -25,13 +24,11 @@ import Data.Proxy
 import GHC.Generics
     ( Generic )
 import GHC.TypeLits
-    ( KnownNat, KnownSymbol, Nat, Symbol, natVal, symbolVal )
+    ( KnownSymbol, Symbol, symbolVal )
 import Internal.Text.Read
     ( skipChar, skipString )
 import Text.Read
     ( Read (..) )
-
-import qualified Data.List as L
 
 --------------------------------------------------------------------------------
 -- Prefixes
@@ -42,7 +39,7 @@ newtype Prefix (prefix :: Symbol) a = Prefix { unPrefix :: a }
 
 instance (KnownSymbol prefix, Read a) => Read (Prefix prefix a) where
     readPrec = do
-        many $ skipChar ' '
+        void $ many $ skipChar ' '
         skipString $ symbolVal $ Proxy @prefix
         Prefix <$> readPrec @a
 

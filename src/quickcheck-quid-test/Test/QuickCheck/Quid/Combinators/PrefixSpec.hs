@@ -3,6 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Test.QuickCheck.Quid.Combinators.PrefixSpec
     where
@@ -10,13 +11,12 @@ module Test.QuickCheck.Quid.Combinators.PrefixSpec
 import Internal.Test.QuickCheck.Quid.Combinators.Prefix
     ( Prefix (..) )
 import Test.Hspec
-    ( Spec, describe, it, parallel )
+    ( Spec, describe, parallel )
 import Test.QuickCheck
     ( Arbitrary (..), shrinkMapBy )
 import Test.QuickCheck.Classes.Hspec
     ( testLawsMany )
 
-import qualified Data.Text.Lazy as TL
 import qualified Test.QuickCheck.Classes as Laws
 
 spec :: Spec

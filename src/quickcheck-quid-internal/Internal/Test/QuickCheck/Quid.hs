@@ -10,34 +10,14 @@
 module Internal.Test.QuickCheck.Quid
     where
 
-import Control.Applicative
-    ( many, (<|>) )
 import Control.DeepSeq
     ( NFData )
-import Control.Monad
-    ( mzero, replicateM, replicateM_ )
 import Data.Data
     ( Data )
-import Data.Either.Extra
-    ( eitherToMaybe )
 import Data.Hashable
     ( Hashable (..) )
-import Data.List.NonEmpty
-    ( NonEmpty (..) )
-import Data.Map.Strict
-    ( Map )
-import Data.Maybe
-    ( catMaybes )
-import Data.Ord
-    ( Down (..) )
-import Data.Proxy
-    ( Proxy (..) )
-import Data.Text
-    ( Text )
 import GHC.Generics
     ( Generic )
-import GHC.TypeLits
-    ( KnownNat, KnownSymbol, Nat, Symbol, natVal, symbolVal )
 import Numeric.Natural
     ( Natural )
 import Test.QuickCheck
@@ -45,27 +25,16 @@ import Test.QuickCheck
     , CoArbitrary (..)
     , Function (..)
     , Gen
-    , arbitraryBoundedEnum
     , chooseInteger
     , coarbitraryShow
-    , frequency
     , functionShow
-    , resize
-    , shrinkMap
     , shrinkMapBy
     , sized
     )
 import Test.QuickCheck.Function
     ( (:->) )
-import Text.Read
-    ( Read (..), ReadPrec (..), choice, get, look, pfail, readMaybe )
 
-import qualified Data.Foldable as F
 import qualified Data.List as L
-import qualified Data.List.NonEmpty as NE
-import qualified Data.Map.Strict as Map
-import qualified Data.Text as T
-import qualified Test.QuickCheck as QC
 
 --------------------------------------------------------------------------------
 -- Quids

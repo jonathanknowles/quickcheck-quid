@@ -8,11 +8,11 @@ module Internal.Test.QuickCheck.Quid.Representations.Latin
     where
 
 import Control.Applicative
-    ( many, (<|>) )
+    ( many )
 import Control.DeepSeq
     ( NFData )
 import Control.Monad
-    ( mzero, replicateM, replicateM_ )
+    ( replicateM, void )
 import Data.Data
     ( Data )
 import Data.Hashable
@@ -28,22 +28,11 @@ import Internal.Text.Read
 import Numeric.Natural
     ( Natural )
 import Test.QuickCheck
-    ( Arbitrary (..)
-    , Function (..)
-    , Gen
-    , arbitraryBoundedEnum
-    , chooseInteger
-    , coarbitraryShow
-    , functionShow
-    , frequency
-    , shrinkMap
-    , shrinkMapBy
-    )
+    ( Gen, arbitraryBoundedEnum, shrinkMap )
 import Text.Read
-    ( Read (..), ReadPrec (..), choice, get, look, pfail, readMaybe )
+    ( Read (..), ReadPrec, readMaybe )
 
 import qualified Data.Foldable as F
-import qualified Data.List as L
 import qualified Data.List.NonEmpty as NE
 
 --------------------------------------------------------------------------------
@@ -102,7 +91,7 @@ newtype LatinString = LatinString
 
 instance Read LatinString where
     readPrec = do
-        many (skipChar ' ')
+        void $ many (skipChar ' ')
         LatinString <$> ((:|) <$> readChar <*> many readChar)
       where
         readChar :: ReadPrec LatinChar
@@ -131,8 +120,8 @@ latinStringToQuid (LatinString xs) = Quid $
     f !acc !x = acc * 26 + 1 + fromIntegral (fromEnum x)
 
 latinStringFromQuid :: Quid -> LatinString
-latinStringFromQuid (Quid n) =
-    LatinString . NE.fromList $ go [] n
+latinStringFromQuid (Quid q) =
+    LatinString . NE.fromList $ go [] q
   where
     go :: [LatinChar] -> Natural -> [LatinChar]
     go !acc !n

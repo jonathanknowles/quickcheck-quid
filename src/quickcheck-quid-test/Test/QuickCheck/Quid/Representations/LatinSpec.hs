@@ -4,6 +4,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Test.QuickCheck.Quid.Representations.LatinSpec
     where
@@ -14,16 +15,22 @@ import Internal.Test.QuickCheck.Quid
     ( Quid, arbitraryQuid, quidFromNatural, shrinkQuid )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
     ( Latin (..) )
+import Numeric.Natural
+    ( Natural )
 import Test.Hspec
     ( Spec, describe, it, parallel )
 import Test.QuickCheck
-    ( Arbitrary (..), property, shrinkMapBy, sized, (===) )
+    ( Arbitrary (..), property, shrinkMapBy, (===) )
 import Test.QuickCheck.Classes.Hspec
     ( testLawsMany )
 import Text.Pretty.Simple
     ( pShow )
 
+import Prelude hiding
+    ( (^) )
+
 import qualified Data.Text.Lazy as TL
+import qualified Prelude
 import qualified Test.QuickCheck.Classes as Laws
 
 spec :: Spec
@@ -48,7 +55,12 @@ unitTests_show_latin_quidFromNatural = unitTests
     (show . Latin . quidFromNatural)
     (mkTest <$> tests)
   where
+    mkTest :: (Natural, String) -> UnitTestData Natural String
     mkTest (params, result) = UnitTestData {params, result}
+
+    (^) :: Natural -> Natural -> Natural
+    (^) = (Prelude.^)
+
     tests =
         [ ( 0, "A")
         , ( 1, "B")

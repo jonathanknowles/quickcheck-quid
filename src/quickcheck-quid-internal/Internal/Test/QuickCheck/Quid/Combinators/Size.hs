@@ -20,9 +20,9 @@ import Data.Proxy
 import GHC.Generics
     ( Generic )
 import GHC.TypeLits
-    ( KnownNat, KnownSymbol, Nat, Symbol, natVal, symbolVal )
+    ( KnownNat, Nat, natVal )
 import Test.QuickCheck
-    ( Arbitrary (..), CoArbitrary, Function, resize, shrinkMapBy )
+    ( Arbitrary (..), resize, shrinkMapBy )
 
 --------------------------------------------------------------------------------
 -- Sizes

@@ -12,11 +12,7 @@ module Test.QuickCheck.QuidSpec
 import Control.Arrow
     ( (&&&) )
 import Control.Monad
-    ( forM_, replicateM )
-import Data.List.NonEmpty
-    ( NonEmpty (..) )
-import Data.Map.Strict
-    ( Map )
+    ( replicateM )
 import Data.Maybe
     ( fromMaybe )
 import Data.Ord
@@ -26,15 +22,7 @@ import Data.Ratio
 import Data.Set
     ( Set )
 import Internal.Test.QuickCheck.Quid
-    ( Quid
-    , arbitraryQuid
-    , quidFromNatural
-    , quidToNatural
-    , shrinkNatural
-    , shrinkQuid
-    )
-import Internal.Test.QuickCheck.Quid.Combinators.Chunk
-    ( Chunk (..) )
+    ( Quid, arbitraryQuid, quidFromNatural, quidToNatural, shrinkQuid )
 import Internal.Test.QuickCheck.Quid.Combinators.Prefix
     ( Prefix (..) )
 import Internal.Test.QuickCheck.Quid.Combinators.Size
@@ -55,29 +43,23 @@ import Test.QuickCheck
     , conjoin
     , counterexample
     , cover
-    , forAll
     , forAllBlind
     , frequency
     , label
     , property
     , resize
     , shrinkMapBy
-    , shrinkNothing
-    , sized
     , withMaxSuccess
     , (===)
     )
 import Test.QuickCheck.Classes.Hspec
     ( testLawsMany )
-import Text.Pretty.Simple
-    ( pShow )
 import Text.Printf
     ( printf )
 
 import qualified Data.List as L
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-import qualified Data.Text.Lazy as TL
 import qualified Test.QuickCheck.Classes as Laws
 
 spec :: Spec
@@ -148,7 +130,7 @@ prop_arbitraryQuid_uniform (SizeExponent sizeExponent) =
     bucketSize = max 1 (size `div` fromIntegral bucketCount)
 
     size :: Natural
-    size = 2 ^ fromIntegral sizeExponent
+    size = 2 ^ fromIntegral @Int @Natural sizeExponent
 
     prop :: [Quid] -> Property
     prop quids =
@@ -239,7 +221,7 @@ prop_shrinkQuid_minimalSet qs =
     bucket :: Int -> (Int, Int)
     bucket size = (lo, hi)
       where
-        lo = expectedSize `div` 10 * 10
+        lo = size `div` 10 * 10
         hi = lo + 9
 
     expectedSize :: Int
@@ -267,11 +249,11 @@ prop_shrinkQuid_unique (Size q) =
 --------------------------------------------------------------------------------
 
 shrinkWhile :: (a -> Bool) -> (a -> [a]) -> a -> Maybe a
-shrinkWhile condition shrink = loop
+shrinkWhile condition shrinkFn = loop
   where
     loop a
         | condition a =
-            case L.find condition (shrink a) of
+            case L.find condition (shrinkFn a) of
                 Nothing -> Just a
                 Just a' -> loop a'
         | otherwise =
