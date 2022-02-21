@@ -19,6 +19,8 @@ import Data.Hashable
     ( Hashable (..) )
 import Data.List.NonEmpty
     ( NonEmpty (..) )
+import Data.Maybe
+    ( mapMaybe )
 import GHC.Generics
     ( Generic )
 import Internal.Test.QuickCheck.Quid
@@ -28,7 +30,14 @@ import Internal.Text.Read
 import Numeric.Natural
     ( Natural )
 import Test.QuickCheck
-    ( Gen, arbitraryBoundedEnum, shrinkMap )
+    ( Arbitrary (..)
+    , Gen
+    , arbitraryBoundedEnum
+    , shrinkList
+    , shrinkMap
+    , shrinkMapBy
+    , sized
+    )
 import Text.Read
     ( Read (..), ReadPrec, readMaybe )
 
@@ -56,6 +65,10 @@ data LatinChar
     = A | B | C | D | E | F | G | H | I | J | K | L | M
     | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
     deriving (Bounded, Enum, Eq, Ord, Read, Show)
+
+instance Arbitrary LatinChar where
+    arbitrary = arbitraryLatinChar
+    shrink = shrinkLatinChar
 
 --------------------------------------------------------------------------------
 -- Generation and shrinking of arbitrary Latin characters
@@ -85,6 +98,10 @@ newtype LatinString = LatinString
     { unLatinString :: NonEmpty LatinChar }
     deriving (Eq, Ord)
 
+instance Arbitrary LatinString where
+    arbitrary = arbitraryLatinString
+    shrink = shrinkLatinString
+
 --------------------------------------------------------------------------------
 -- Conversion between Latin strings and ordinary strings
 --------------------------------------------------------------------------------
@@ -101,13 +118,18 @@ instance Show LatinString where
     show (LatinString cs) = F.foldMap show cs
 
 --------------------------------------------------------------------------------
--- Generation of arbitrary Latin strings
+-- Generation and shrinking of arbitrary Latin strings
 --------------------------------------------------------------------------------
 
-arbitraryLatinString :: Int -> Gen LatinString
-arbitraryLatinString stringLen =
-    LatinString . NE.fromList <$>
-    replicateM (max 1 stringLen) arbitraryLatinChar
+arbitraryLatinString :: Gen LatinString
+arbitraryLatinString = sized $ \size ->
+    fmap LatinString . (:|)
+        <$> arbitraryLatinChar
+        <*> replicateM size arbitraryLatinChar
+
+shrinkLatinString :: LatinString -> [LatinString]
+shrinkLatinString =
+    shrinkMapBy LatinString unLatinString $ shrinkListNonEmpty shrinkLatinChar
 
 --------------------------------------------------------------------------------
 -- Conversion between Latin strings and quids
@@ -129,3 +151,11 @@ latinStringFromQuid (Quid q) =
             toEnum (fromIntegral n) : acc
         | otherwise =
             go (toEnum (fromIntegral (n `mod` 26)) : acc) (n `div` 26 - 1)
+
+--------------------------------------------------------------------------------
+-- Shrinking support
+--------------------------------------------------------------------------------
+
+shrinkListNonEmpty :: (a -> [a]) -> NonEmpty a -> [NonEmpty a]
+shrinkListNonEmpty shrinkFn =
+    mapMaybe NE.nonEmpty . shrinkList shrinkFn . F.toList
