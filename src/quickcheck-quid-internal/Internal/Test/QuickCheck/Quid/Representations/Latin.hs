@@ -19,10 +19,10 @@ import Data.Hashable
     ( Hashable (..) )
 import Data.List.NonEmpty
     ( NonEmpty (..) )
-import Data.Maybe
-    ( mapMaybe )
 import GHC.Generics
     ( Generic )
+import Internal.Test.QuickCheck
+    ( shrinkListNonEmpty )
 import Internal.Test.QuickCheck.Quid
     ( Quid (..) )
 import Internal.Text.Read
@@ -33,7 +33,6 @@ import Test.QuickCheck
     ( Arbitrary (..)
     , Gen
     , arbitraryBoundedEnum
-    , shrinkList
     , shrinkMap
     , shrinkMapBy
     , sized
@@ -151,11 +150,3 @@ latinStringFromQuid (Quid q) =
             toEnum (fromIntegral n) : acc
         | otherwise =
             go (toEnum (fromIntegral (n `mod` 26)) : acc) (n `div` 26 - 1)
-
---------------------------------------------------------------------------------
--- Shrinking support
---------------------------------------------------------------------------------
-
-shrinkListNonEmpty :: (a -> [a]) -> NonEmpty a -> [NonEmpty a]
-shrinkListNonEmpty shrinkFn =
-    mapMaybe NE.nonEmpty . shrinkList shrinkFn . F.toList

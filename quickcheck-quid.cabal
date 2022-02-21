@@ -45,6 +45,7 @@ library quickcheck-quid-internal
     hs-source-dirs:
         src/quickcheck-quid-internal
     exposed-modules:
+        Internal.Test.QuickCheck
         Internal.Test.QuickCheck.Quid
         Internal.Test.QuickCheck.Quid.Combinators.Chunk
         Internal.Test.QuickCheck.Quid.Combinators.Prefix
