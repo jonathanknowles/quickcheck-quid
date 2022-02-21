@@ -12,15 +12,15 @@ module Test.QuickCheck.Quid.Representations.LatinSpec
 import Internal.Test.QuickCheck.Quid
     ( Quid, arbitraryQuid, quidFromNatural, shrinkQuid )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
-    ( Latin (..) )
+    ( Latin (..), LatinString )
 import Numeric.Natural
     ( Natural )
 import Test.Hspec
-    ( Spec, describe, parallel )
+    ( Spec, describe, it, parallel )
 import Test.Hspec.Unit
     ( UnitTestData (..), unitTests )
 import Test.QuickCheck
-    ( Arbitrary (..), shrinkMapBy )
+    ( Arbitrary (..), Property, property, shrinkMapBy, (===) )
 import Test.QuickCheck.Classes.Hspec
     ( testLawsMany )
 
@@ -39,8 +39,23 @@ spec = do
             , Laws.showReadLaws
             ]
 
+    parallel $ describe "Round-trip tests" $ do
+        it "Roundtrip between Latin strings and quids" $
+            property prop_roundTrip_LatinString_Quid
+
     parallel $ describe "Unit tests" $ do
         unitTests_show_latin_quidFromNatural
+
+--------------------------------------------------------------------------------
+-- Properties
+--------------------------------------------------------------------------------
+
+prop_roundTrip_LatinString_Quid :: LatinString -> Property
+prop_roundTrip_LatinString_Quid latinString =
+    show (read @(Latin Quid) expectedOutput) === expectedOutput
+  where
+    expectedOutput :: String
+    expectedOutput = show latinString
 
 --------------------------------------------------------------------------------
 -- Unit tests
