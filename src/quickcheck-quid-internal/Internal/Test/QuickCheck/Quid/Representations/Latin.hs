@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -25,10 +24,10 @@ import Internal.Test.QuickCheck
     ( shrinkListNonEmpty )
 import Internal.Test.QuickCheck.Quid
     ( Quid (..) )
+import Internal.Test.QuickCheck.Quid.Representations
+    ( nonEmptyListFromQuid, nonEmptyListToQuid )
 import Internal.Text.Read
     ( readCharMaybe, skipChar )
-import Numeric.Natural
-    ( Natural )
 import Test.QuickCheck
     ( Arbitrary (..)
     , Gen
@@ -41,7 +40,6 @@ import Text.Read
     ( Read (..), ReadPrec, readMaybe )
 
 import qualified Data.Foldable as F
-import qualified Data.List.NonEmpty as NE
 
 --------------------------------------------------------------------------------
 -- Latin representation
@@ -135,18 +133,7 @@ shrinkLatinString =
 --------------------------------------------------------------------------------
 
 latinStringToQuid :: LatinString -> Quid
-latinStringToQuid (LatinString xs) = Quid $
-    F.foldl' f 0 xs - 1
-  where
-    f !acc !x = acc * 26 + 1 + fromIntegral (fromEnum x)
+latinStringToQuid = nonEmptyListToQuid . unLatinString
 
 latinStringFromQuid :: Quid -> LatinString
-latinStringFromQuid (Quid q) =
-    LatinString . NE.fromList $ go [] q
-  where
-    go :: [LatinChar] -> Natural -> [LatinChar]
-    go !acc !n
-        | n < 26 =
-            toEnum (fromIntegral n) : acc
-        | otherwise =
-            go (toEnum (fromIntegral (n `mod` 26)) : acc) (n `div` 26 - 1)
+latinStringFromQuid = LatinString . nonEmptyListFromQuid

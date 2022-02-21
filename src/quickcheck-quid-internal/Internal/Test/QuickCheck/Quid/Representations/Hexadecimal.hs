@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -25,10 +24,10 @@ import Internal.Test.QuickCheck
     ( shrinkListNonEmpty )
 import Internal.Test.QuickCheck.Quid
     ( Quid (..) )
+import Internal.Test.QuickCheck.Quid.Representations
+    ( nonEmptyListFromQuid, nonEmptyListToQuid )
 import Internal.Text.Read
     ( readCharMaybe, skipChar )
-import Numeric.Natural
-    ( Natural )
 import Test.QuickCheck
     ( Arbitrary (..)
     , Gen
@@ -41,7 +40,6 @@ import Text.Read
     ( Read (..), ReadPrec, readMaybe )
 
 import qualified Data.Foldable as F
-import qualified Data.List.NonEmpty as NE
 
 --------------------------------------------------------------------------------
 -- Hexadecimal representation
@@ -136,18 +134,7 @@ shrinkHexadecimalString =
 --------------------------------------------------------------------------------
 
 hexadecimalStringToQuid :: HexadecimalString -> Quid
-hexadecimalStringToQuid (HexadecimalString xs) = Quid $
-    F.foldl' f 0 xs - 1
-  where
-    f !acc !x = acc * 16 + 1 + fromIntegral (fromEnum x)
+hexadecimalStringToQuid = nonEmptyListToQuid . unHexadecimalString
 
 hexadecimalStringFromQuid :: Quid -> HexadecimalString
-hexadecimalStringFromQuid (Quid q) =
-    HexadecimalString . NE.fromList $ go [] q
-  where
-    go :: [HexadecimalChar] -> Natural -> [HexadecimalChar]
-    go !acc !n
-        | n < 16 =
-            toEnum (fromIntegral n) : acc
-        | otherwise =
-            go (toEnum (fromIntegral (n `mod` 16)) : acc) (n `div` 16 - 1)
+hexadecimalStringFromQuid = HexadecimalString . nonEmptyListFromQuid
