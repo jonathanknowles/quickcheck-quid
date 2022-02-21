@@ -3,7 +3,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 
 module Internal.Test.QuickCheck.Quid.Representations.Latin
     where
@@ -24,6 +23,8 @@ import GHC.Generics
     ( Generic )
 import Internal.Test.QuickCheck.Quid
     ( Quid (..) )
+import Internal.Text.Read
+    ( readCharMaybe, skipChar )
 import Numeric.Natural
     ( Natural )
 import Test.QuickCheck
@@ -33,8 +34,8 @@ import Test.QuickCheck
     , arbitraryBoundedEnum
     , chooseInteger
     , coarbitraryShow
-    , frequency
     , functionShow
+    , frequency
     , shrinkMap
     , shrinkMapBy
     )
@@ -139,18 +140,3 @@ latinStringFromQuid (Quid n) =
             toEnum (fromIntegral n) : acc
         | otherwise =
             go (toEnum (fromIntegral (n `mod` 26)) : acc) (n `div` 26 - 1)
-
---------------------------------------------------------------------------------
--- Reading suppport
---------------------------------------------------------------------------------
-
-readCharMaybe :: (Char -> Maybe a) -> ReadPrec a
-readCharMaybe f = look >>= \case
-    a : _ | Just c <- f a ->
-        get >> pure c
-    _ ->
-        pfail
-
-skipChar :: Char -> ReadPrec ()
-skipChar charToSkip = readCharMaybe
-    (\char -> if char == charToSkip then Just () else Nothing)

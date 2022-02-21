@@ -50,6 +50,7 @@ library quickcheck-quid-internal
         Internal.Test.QuickCheck.Quid.Combinators.Prefix
         Internal.Test.QuickCheck.Quid.Combinators.Size
         Internal.Test.QuickCheck.Quid.Representations.Latin
+        Internal.Text.Read
     default-language:
         Haskell2010
     build-depends:

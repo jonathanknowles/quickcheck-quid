@@ -26,8 +26,10 @@ import GHC.Generics
     ( Generic )
 import GHC.TypeLits
     ( KnownNat, KnownSymbol, Nat, Symbol, natVal, symbolVal )
+import Internal.Text.Read
+    ( skipChar, skipString )
 import Text.Read
-    ( Read (..), ReadPrec (..), choice, get, look, pfail, readMaybe )
+    ( Read (..) )
 
 import qualified Data.List as L
 
@@ -46,25 +48,3 @@ instance (KnownSymbol prefix, Read a) => Read (Prefix prefix a) where
 
 instance (KnownSymbol prefix, Show a) => Show (Prefix prefix a) where
     show (Prefix a) = symbolVal (Proxy @prefix) <> show a
-
---------------------------------------------------------------------------------
--- Reading suppport
---------------------------------------------------------------------------------
-
-readCharMaybe :: (Char -> Maybe a) -> ReadPrec a
-readCharMaybe f = look >>= \case
-    a : _ | Just c <- f a ->
-        get >> pure c
-    _ ->
-        pfail
-
-skipString :: String -> ReadPrec ()
-skipString stringToSkip = do
-    remainder <- look
-    if stringToSkip `L.isPrefixOf` remainder
-    then replicateM_ (length stringToSkip) get
-    else pfail
-
-skipChar :: Char -> ReadPrec ()
-skipChar charToSkip = readCharMaybe
-    (\char -> if char == charToSkip then Just () else Nothing)
