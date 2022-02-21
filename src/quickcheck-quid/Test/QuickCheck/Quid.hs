@@ -8,6 +8,7 @@ module Test.QuickCheck.Quid
     , Size (..)
 
     -- * Representations
+    , Hexadecimal (..)
     , Latin (..)
     )
     where
@@ -18,5 +19,7 @@ import Internal.Test.QuickCheck.Quid.Combinators.Prefix
     ( Prefix (..) )
 import Internal.Test.QuickCheck.Quid.Combinators.Size
     ( Size (..) )
+import Internal.Test.QuickCheck.Quid.Representations.Hexadecimal
+    ( Hexadecimal (..) )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
     ( Latin (..) )

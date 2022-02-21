@@ -49,6 +49,7 @@ library quickcheck-quid-internal
         Internal.Test.QuickCheck.Quid.Combinators.Chunk
         Internal.Test.QuickCheck.Quid.Combinators.Prefix
         Internal.Test.QuickCheck.Quid.Combinators.Size
+        Internal.Test.QuickCheck.Quid.Representations.Hexadecimal
         Internal.Test.QuickCheck.Quid.Representations.Latin
         Internal.Text.Read
     default-language:
@@ -71,6 +72,7 @@ test-suite quickcheck-quid-test
         Test.QuickCheck.Classes.Hspec
         Test.QuickCheck.QuidSpec
         Test.QuickCheck.Quid.Combinators.PrefixSpec
+        Test.QuickCheck.Quid.Representations.HexadecimalSpec
         Test.QuickCheck.Quid.Representations.LatinSpec
         Test.Hspec.Unit
     type: exitcode-stdio-1.0
