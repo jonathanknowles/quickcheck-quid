@@ -5,7 +5,6 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeApplications #-}
 
 module Internal.Test.QuickCheck.Quid.Combinators.Prefix
@@ -69,6 +68,3 @@ skipString stringToSkip = do
 skipChar :: Char -> ReadPrec ()
 skipChar charToSkip = readCharMaybe
     (\char -> if char == charToSkip then Just () else Nothing)
-
-readWith :: (String -> Maybe a) -> (Int -> String -> [(a, String)])
-readWith f _ = maybe [] (pure . (, "")) . f

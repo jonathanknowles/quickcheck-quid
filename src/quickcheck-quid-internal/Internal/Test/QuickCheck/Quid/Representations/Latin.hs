@@ -4,7 +4,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE TupleSections #-}
 
 module Internal.Test.QuickCheck.Quid.Representations.Latin
     where
@@ -152,16 +151,6 @@ readCharMaybe f = look >>= \case
     _ ->
         pfail
 
-skipString :: String -> ReadPrec ()
-skipString stringToSkip = do
-    remainder <- look
-    if stringToSkip `L.isPrefixOf` remainder
-    then replicateM_ (length stringToSkip) get
-    else pfail
-
 skipChar :: Char -> ReadPrec ()
 skipChar charToSkip = readCharMaybe
     (\char -> if char == charToSkip then Just () else Nothing)
-
-readWith :: (String -> Maybe a) -> (Int -> String -> [(a, String)])
-readWith f _ = maybe [] (pure . (, "")) . f
