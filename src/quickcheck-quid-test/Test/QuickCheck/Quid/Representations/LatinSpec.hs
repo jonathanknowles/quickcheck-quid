@@ -17,7 +17,7 @@ import Internal.Test.QuickCheck.Quid.Representations.Latin
 import Test.Hspec
     ( Spec, describe, it, parallel )
 import Test.QuickCheck
-    ( Arbitrary (..), property, sized, shrinkMapBy, (===) )
+    ( Arbitrary (..), property, shrinkMapBy, sized, (===) )
 import Test.QuickCheck.Classes.Hspec
     ( testLawsMany )
 import Text.Pretty.Simple

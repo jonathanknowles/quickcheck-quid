@@ -48,8 +48,8 @@ import Test.QuickCheck
     , arbitraryBoundedEnum
     , chooseInteger
     , coarbitraryShow
-    , functionShow
     , frequency
+    , functionShow
     , resize
     , shrinkMap
     , shrinkMapBy

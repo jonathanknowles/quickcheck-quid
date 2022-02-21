@@ -33,8 +33,8 @@ import Test.QuickCheck
     , arbitraryBoundedEnum
     , chooseInteger
     , coarbitraryShow
-    , functionShow
     , frequency
+    , functionShow
     , shrinkMap
     , shrinkMapBy
     )
