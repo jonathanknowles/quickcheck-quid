@@ -86,6 +86,7 @@ test-suite quickcheck-quid-test
         QuickCheck
       , base >=4.7 && <5
       , containers
+      , fmt
       , hspec
       , pretty-simple
       , quickcheck-classes

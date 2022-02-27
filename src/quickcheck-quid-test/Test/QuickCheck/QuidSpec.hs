@@ -22,6 +22,10 @@ import Data.Ratio
     ( (%) )
 import Data.Set
     ( Set )
+import Data.Text.Lazy.Builder
+    ( Builder, fromLazyText )
+import Fmt
+    ( indentF, (+|), (|+) )
 import Internal.Test.QuickCheck.Quid
     ( Quid, arbitraryQuid, quidFromNatural, quidToNatural, shrinkQuid )
 import Internal.Test.QuickCheck.Quid.Combinators.Prefix
@@ -39,6 +43,7 @@ import Test.QuickCheck
     , Fixed (..)
     , Gen
     , Property
+    , Testable (..)
     , checkCoverage
     , choose
     , conjoin
@@ -51,10 +56,13 @@ import Test.QuickCheck
     , resize
     , shrinkMapBy
     , withMaxSuccess
+    , (.&&.)
     , (===)
     )
 import Test.QuickCheck.Classes.Hspec
     ( testLawsMany )
+import Text.Pretty.Simple
+    ( pShow )
 import Text.Printf
     ( printf )
 
@@ -280,6 +288,35 @@ frequencies
     = L.sortOn ((Down . snd) &&& fst)
     . Map.toList
     . L.foldr (flip (Map.insertWith (<>)) mempty) Map.empty
+
+--------------------------------------------------------------------------------
+-- Reporting
+--------------------------------------------------------------------------------
+
+-- | Adds a named variable to the counterexample output of a property.
+--
+-- On failure, uses pretty-printing to show the contents of the variable.
+--
+report :: (Show a, Testable prop) => a -> String -> prop -> Property
+report a name = counterexample $
+    "" +| name |+ ":\n" +| indentF 4 (pShowBuilder a) |+ ""
+  where
+    pShowBuilder :: Show a => a -> Builder
+    pShowBuilder = fromLazyText . pShow
+
+--------------------------------------------------------------------------------
+-- Verification
+--------------------------------------------------------------------------------
+
+-- | Adds a named condition to a property.
+--
+-- On failure, reports the name of the condition that failed.
+--
+check :: Bool -> String -> Property -> Property
+check condition conditionTitle =
+    (.&&.) (counterexample counterexampleText $ property condition)
+  where
+    counterexampleText = "Condition violated: " <> conditionTitle
 
 --------------------------------------------------------------------------------
 -- Test types
