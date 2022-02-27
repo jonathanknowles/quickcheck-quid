@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NumericUnderscores #-}
@@ -263,8 +264,10 @@ shrinkWhile condition shrinkFn = loop
 -- Frequencies
 --------------------------------------------------------------------------------
 
-newtype Frequency = Frequency {unFrequency :: Natural}
-    deriving (Eq, Ord, Show)
+type Frequency = FrequencyOf Natural
+
+newtype FrequencyOf a = Frequency {unFrequency :: a}
+    deriving (Eq, Functor, Ord, Show)
 
 instance Semigroup Frequency where
     Frequency f1 <> Frequency f2 = Frequency (f1 + f2)
