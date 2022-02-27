@@ -89,6 +89,7 @@ test-suite quickcheck-quid-test
       , fmt
       , hspec
       , pretty-simple
+      , primes
       , quickcheck-classes
       , quickcheck-quid
       , quickcheck-quid-internal

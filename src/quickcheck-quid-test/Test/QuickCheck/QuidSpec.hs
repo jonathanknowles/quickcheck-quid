@@ -1,7 +1,10 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -14,20 +17,29 @@ import Control.Arrow
     ( (&&&) )
 import Control.Monad
     ( replicateM )
+import Data.Functor
+    ( (<&>) )
 import Data.Maybe
     ( fromMaybe )
+import Data.Numbers.Primes
+    ( primes )
 import Data.Ord
     ( Down (..) )
-import Data.Ratio
-    ( (%) )
 import Data.Set
     ( Set )
 import Data.Text.Lazy.Builder
     ( Builder, fromLazyText )
 import Fmt
-    ( indentF, (+|), (|+) )
+    ( Buildable (..), indentF, padLeftF, pretty, (+|), (|+) )
 import Internal.Test.QuickCheck.Quid
-    ( Quid, arbitraryQuid, quidFromNatural, quidToNatural, shrinkQuid )
+    ( Quid
+    , arbitraryQuid
+    , chooseNatural
+    , quidFromNatural
+    , quidToNatural
+    , shrinkNatural
+    , shrinkQuid
+    )
 import Internal.Test.QuickCheck.Quid.Combinators.Prefix
     ( Prefix (..) )
 import Internal.Test.QuickCheck.Quid.Combinators.Size
@@ -45,13 +57,13 @@ import Test.QuickCheck
     , Property
     , Testable (..)
     , checkCoverage
-    , choose
     , conjoin
     , counterexample
     , cover
     , forAllBlind
-    , frequency
     , label
+    , liftShrink2
+    , oneof
     , property
     , resize
     , shrinkMapBy
@@ -63,8 +75,6 @@ import Test.QuickCheck.Classes.Hspec
     ( testLawsMany )
 import Text.Pretty.Simple
     ( pShow )
-import Text.Printf
-    ( printf )
 
 import qualified Data.List as L
 import qualified Data.Map.Strict as Map
@@ -107,80 +117,270 @@ spec = do
             property prop_shrinkQuid_unique
 
 --------------------------------------------------------------------------------
+-- Powers of two
+--------------------------------------------------------------------------------
+
+newtype PowerOfTwo = PowerOfTwo {powerOfTwoExponent :: Natural}
+    deriving (Eq, Ord, Show)
+
+instance Buildable PowerOfTwo where
+    build (PowerOfTwo e) = "2^" <> build (show e)
+
+evalPowerOfTwo :: PowerOfTwo -> Natural
+evalPowerOfTwo = (2 ^) . powerOfTwoExponent
+
+genPowerOfTwo :: (Natural, Natural) -> Gen PowerOfTwo
+genPowerOfTwo (lo, hi) = PowerOfTwo <$> chooseNatural (lo, hi)
+
+shrinkPowerOfTwo :: PowerOfTwo -> [PowerOfTwo]
+shrinkPowerOfTwo = shrinkMapBy PowerOfTwo powerOfTwoExponent shrinkNatural
+
+--------------------------------------------------------------------------------
+-- Prime numbers
+--------------------------------------------------------------------------------
+
+newtype PrimeNumber = PrimeNumber {primeNumberIndex :: Natural}
+    deriving (Eq, Ord, Show)
+
+instance Buildable PrimeNumber where
+    build = build . show . evalPrimeNumber
+
+evalPrimeNumber :: PrimeNumber -> Natural
+evalPrimeNumber = indexToPrime primes . primeNumberIndex
+  where
+    indexToPrime ps i
+        | i == 0 = head ps
+        | otherwise = indexToPrime (drop 1 ps) (i - 1)
+
+genPrimeNumber :: (Natural, Natural) -> Gen PrimeNumber
+genPrimeNumber (lo, hi) = PrimeNumber <$> chooseNatural (lo, hi)
+
+shrinkPrimeNumber :: PrimeNumber -> [PrimeNumber]
+shrinkPrimeNumber = shrinkMapBy PrimeNumber primeNumberIndex shrinkNatural
+
+--------------------------------------------------------------------------------
+-- Partition functions
+--------------------------------------------------------------------------------
+
+data PartitionFunction
+    = Div PowerOfTwo
+    | Mod PrimeNumber
+    deriving (Eq, Ord, Show)
+
+instance Buildable PartitionFunction where
+    build = \case
+        Div p -> "div " <> padLeftF 5 ' ' p
+        Mod p -> "mod " <> padLeftF 5 ' ' p
+
+evalPartitionFunction :: PartitionFunction -> (Natural -> Natural)
+evalPartitionFunction = \case
+    Div p -> (`div` evalPowerOfTwo  p)
+    Mod p -> (`mod` evalPrimeNumber p)
+
+--------------------------------------------------------------------------------
+-- Partition contexts
+--------------------------------------------------------------------------------
+
+data PartitionContext = PartitionContext
+    { sizeExponent :: PowerOfTwo
+    , expectedBucketCount :: Natural
+    , partitionFunction :: PartitionFunction
+    }
+    deriving (Eq, Ord, Show)
+
+instance Buildable PartitionContext where
+    build c = mconcat
+        [ "(size = "
+        , padLeftF 5 ' ' (sizeExponent c)
+        , ", expected bucket count = "
+        , padLeftF 3 ' ' (show $ expectedBucketCount c)
+        , ", partition function = "
+        , build (partitionFunction c)
+        , ")"
+        ]
+
+--------------------------------------------------------------------------------
+-- Div partitions
+--------------------------------------------------------------------------------
+
+data DivPartition = DivPartition
+    { divArgument :: PowerOfTwo
+    , scaleFactor :: PowerOfTwo
+    }
+    deriving (Eq, Ord, Show)
+
+evalDivPartition :: DivPartition -> PartitionContext
+evalDivPartition DivPartition {divArgument, scaleFactor} =
+    PartitionContext
+        { sizeExponent = PowerOfTwo
+            $ powerOfTwoExponent divArgument
+            + powerOfTwoExponent scaleFactor
+        , expectedBucketCount = evalPowerOfTwo scaleFactor
+        , partitionFunction = Div divArgument
+        }
+
+genDivPartition :: Gen DivPartition
+genDivPartition = do
+    divArgument <- oneof (genPowerOfTwo <$> [(0, 1), (2, 256)])
+    scaleFactor <- oneof (genPowerOfTwo <$> [(0, 1), (2,   8)])
+    pure DivPartition {divArgument, scaleFactor}
+
+shrinkDivPartition :: DivPartition -> [DivPartition]
+shrinkDivPartition = shrinkMapBy unTuple toTuple $
+    liftShrink2 shrinkPowerOfTwo shrinkPowerOfTwo
+  where
+    unTuple (c, s) = (DivPartition c s)
+    toTuple (DivPartition c s) = (c, s)
+
+--------------------------------------------------------------------------------
+-- Mod partitions
+--------------------------------------------------------------------------------
+
+data ModPartition = ModPartition
+    { modArgument :: PrimeNumber
+    , scaleFactor :: PowerOfTwo
+    }
+    deriving (Eq, Ord, Show)
+
+evalModPartition :: ModPartition -> PartitionContext
+evalModPartition ModPartition {modArgument, scaleFactor} =
+    PartitionContext
+        { sizeExponent = PowerOfTwo
+            $ primeNumberIndex modArgument
+            + powerOfTwoExponent scaleFactor
+            + 8
+        , expectedBucketCount = evalPrimeNumber modArgument
+        , partitionFunction = Mod modArgument
+        }
+
+genModPartition :: Gen ModPartition
+genModPartition = do
+    modArgument <- oneof (genPrimeNumber <$> [(0, 1), (2,  32)])
+    scaleFactor <- oneof (genPowerOfTwo  <$> [(0, 1), (2, 256)])
+    pure ModPartition {modArgument, scaleFactor}
+
+shrinkModPartition :: ModPartition -> [ModPartition]
+shrinkModPartition = shrinkMapBy unTuple toTuple $
+    liftShrink2 shrinkPrimeNumber shrinkPowerOfTwo
+  where
+    unTuple (m, s) = (ModPartition m s)
+    toTuple (ModPartition m s) = (m, s)
+
+--------------------------------------------------------------------------------
+-- Partitions
+--------------------------------------------------------------------------------
+
+data Partition
+    = DivPartitionOf DivPartition
+    | ModPartitionOf ModPartition
+    deriving (Eq, Ord, Show)
+
+instance Arbitrary Partition where
+    arbitrary = genPartition
+    shrink = shrinkPartition
+
+evalPartition :: Partition -> PartitionContext
+evalPartition = \case
+    DivPartitionOf p -> evalDivPartition p
+    ModPartitionOf p -> evalModPartition p
+
+genPartition :: Gen Partition
+genPartition = oneof
+    [ DivPartitionOf <$> genDivPartition
+    , ModPartitionOf <$> genModPartition
+    ]
+
+shrinkPartition :: Partition -> [Partition]
+shrinkPartition = \case
+    DivPartitionOf p -> DivPartitionOf <$> shrinkDivPartition p
+    ModPartitionOf p -> ModPartitionOf <$> shrinkModPartition p
+
+--------------------------------------------------------------------------------
 -- Uniformity
 --------------------------------------------------------------------------------
 
-newtype SizeExponent = SizeExponent {unSizeExponent :: Int}
-    deriving (Eq, Ord, Show)
-
-instance Arbitrary SizeExponent where
-    arbitrary = SizeExponent <$> frequency
-        [ (1, pure 0)
-        , (1, pure 256)
-        , (16, choose (1, 255))
-        ]
-    shrink = shrinkMapBy SizeExponent unSizeExponent shrink
-
-prop_arbitraryQuid_uniform :: SizeExponent -> Property
-prop_arbitraryQuid_uniform (SizeExponent sizeExponent) =
-    forAllBlind arbitraryQuids prop
+prop_arbitraryQuid_uniform :: Partition -> Property
+prop_arbitraryQuid_uniform p =
+    label (pretty partitionContext) $
+    forAllBlind arbitraryValues prop
   where
-    arbitraryQuids :: Gen [Quid]
-    arbitraryQuids = replicateM arbitraryQuidCount $
-        resize sizeExponent arbitraryQuid
+    partitionContext :: PartitionContext
+    partitionContext@PartitionContext
+        { sizeExponent
+        , expectedBucketCount
+        , partitionFunction
+        } = evalPartition p
 
-    arbitraryQuidCount :: Int
-    arbitraryQuidCount = bucketCount * 256
+    valueToBucket :: Quid -> Natural
+    valueToBucket = (evalPartitionFunction partitionFunction) . quidToNatural
 
-    bucketCount :: Int
-    bucketCount = fromIntegral $ min 256 size
+    arbitraryValue :: Gen Quid
+    arbitraryValue =
+        resize (fromIntegral (powerOfTwoExponent sizeExponent)) arbitraryQuid
 
-    bucketSize :: Natural
-    bucketSize = max 1 (size `div` fromIntegral bucketCount)
+    arbitraryValues :: Gen [Quid]
+    arbitraryValues =
+        replicateM (fromIntegral arbitraryValueCount) arbitraryValue
 
-    size :: Natural
-    size = 2 ^ fromIntegral @Int @Natural sizeExponent
+    arbitraryValueCount :: Natural
+    arbitraryValueCount = unFrequency expectedFrequency * expectedBucketCount
+
+    expectedFrequency :: Frequency
+    expectedFrequency = Frequency 1024
+
+    minimumPermittedFrequency :: Frequency
+    minimumPermittedFrequency = expectedFrequency <&> ((* 3) . (`div` 4))
+
+    maximumPermittedFrequency :: Frequency
+    maximumPermittedFrequency = expectedFrequency <&> ((* 5) . (`div` 4))
 
     prop :: [Quid] -> Property
-    prop quids =
-        label labelSizeBucketCount $
-        counterexample (unwords . words $ labelSizeBucketCount) $
-        conjoin
-            [ occupiedBucketCount == bucketCount
-            , occupiedBucketFrequencyGreatestToSmallestRatio >= 1
-            , occupiedBucketFrequencyGreatestToSmallestRatio <= 2
-            ]
+    prop values = reports $ checks $ property True
       where
-        labelSizeBucketCount :: String
-        labelSizeBucketCount = mconcat
-            [ "(size exponent = "
-            , printf "% 4d" sizeExponent
-            , ", arbitrary quid count = "
-            , printf "% 6d" arbitraryQuidCount
-            , ", bucket count = "
-            , printf "% 4d" bucketCount
-            , ", occupied bucket count = "
-            , printf "% 4d" occupiedBucketCount
-            , ")"
-            ]
+        reports
+            = report sizeExponent
+                "size exponent"
+            . report arbitraryValueCount
+                "arbitrary value count"
+            . report expectedBucketCount
+                "expected bucket count"
+            . report occupiedBucketCount
+                "occupied bucket count"
+            . report expectedFrequency
+                "expected frequency"
+            . report minimumObservedFrequency
+                "minimum observed frequency"
+            . report minimumPermittedFrequency
+                "minimum permitted frequency"
+            . report maximumObservedFrequency
+                "maximum observed frequency"
+            . report maximumPermittedFrequency
+                "maximum permitted frequency"
+        checks
+            = check
+                (occupiedBucketCount == expectedBucketCount)
+                "occupiedBucketCount == expectedBucketCount"
+            . check
+                (minimumObservedFrequency >= minimumPermittedFrequency)
+                "minimumObservedFrequency >= minimumPermittedFrequency"
+            . check
+                (maximumObservedFrequency <= maximumPermittedFrequency)
+                "maximumObservedFrequency <= maximumPermittedFrequency"
 
         occupiedBuckets :: [Natural]
-        occupiedBuckets = quidToBucket <$> quids
+        occupiedBuckets = valueToBucket <$> values
 
         occupiedBucketFrequencies :: [(Natural, Frequency)]
         occupiedBucketFrequencies = frequencies occupiedBuckets
 
-        occupiedBucketCount :: Int
-        occupiedBucketCount = length occupiedBucketFrequencies
+        occupiedBucketCount :: Natural
+        occupiedBucketCount = fromIntegral $ length occupiedBucketFrequencies
 
-        quidToBucket :: Quid -> Natural
-        quidToBucket = (`div` fromIntegral bucketSize) . quidToNatural
+        minimumObservedFrequency :: Frequency
+        minimumObservedFrequency = snd $ last occupiedBucketFrequencies
 
-        occupiedBucketFrequencyGreatestToSmallestRatio = (%)
-            (unFrequency bucketFrequencyGreatest)
-            (unFrequency bucketFrequencySmallest)
-        bucketFrequencyGreatest = snd $ head occupiedBucketFrequencies
-        bucketFrequencySmallest = snd $ last occupiedBucketFrequencies
+        maximumObservedFrequency :: Frequency
+        maximumObservedFrequency = snd $ head occupiedBucketFrequencies
 
 --------------------------------------------------------------------------------
 -- Uniqueness
