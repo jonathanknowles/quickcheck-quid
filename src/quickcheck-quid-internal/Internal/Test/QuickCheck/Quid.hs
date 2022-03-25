@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -42,7 +43,8 @@ import qualified Data.List as L
 
 newtype Quid = Quid
     { unQuid :: Natural }
-    deriving (Data, Eq, Generic, Hashable, NFData, Ord, Read, Show)
+    deriving (Data, Eq, Generic, Hashable, NFData, Num, Ord)
+    deriving (Read, Show) via Natural
 
 instance Arbitrary Quid where
     arbitrary = arbitraryQuid
