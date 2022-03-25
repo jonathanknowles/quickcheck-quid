@@ -1,1 +1,1 @@
-time cabal build --ghc-options  "-Wall -j8 +RTS -A256m -n4m -RTS"
+time cabal --ghc-options "-Wall -j8 +RTS -A256m -n4m -RTS" build all
