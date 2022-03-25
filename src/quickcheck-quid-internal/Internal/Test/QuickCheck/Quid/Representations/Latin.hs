@@ -133,7 +133,7 @@ unsafeStringtoLatinString :: String -> LatinString
 unsafeStringtoLatinString = fromMaybe raiseError . stringToLatinString
   where
     raiseError = error $ unwords
-        [ "A Latin string must be composed of one or more uppercase"
+        [ "A Latin quid string must be composed of one or more uppercase"
         , "characters in the range [A-Z]."
         ]
 
