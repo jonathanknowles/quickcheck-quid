@@ -1,140 +1,49 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module Internal.Test.QuickCheck.Quid.Representations.Hexadecimal
+    ( Hexadecimal (..)
+    )
     where
 
-import Control.Applicative
-    ( many )
 import Control.DeepSeq
     ( NFData )
-import Control.Monad
-    ( replicateM, void )
+import Data.Bifunctor
+    ( first )
 import Data.Data
     ( Data )
 import Data.Hashable
     ( Hashable (..) )
-import Data.List.NonEmpty
-    ( NonEmpty (..) )
 import GHC.Generics
     ( Generic )
-import Internal.Test.QuickCheck
-    ( shrinkListNonEmpty )
 import Internal.Test.QuickCheck.Quid
     ( Quid (..) )
-import Internal.Test.QuickCheck.Quid.Representations
-    ( nonEmptyListFromQuid, nonEmptyListToQuid )
-import Internal.Text.Read
-    ( readCharMaybe, skipChar )
-import Test.QuickCheck
-    ( Arbitrary (..)
-    , Gen
-    , arbitraryBoundedEnum
-    , shrinkMap
-    , shrinkMapBy
-    , sized
-    )
-import Text.Read
-    ( Read (..), ReadPrec, readMaybe )
-
-import qualified Data.Foldable as F
+import Internal.Test.QuickCheck.Quid.Combinators.Prefix
+    ( Prefix (..) )
+import Numeric
+    ( readHex, showHex )
+import Numeric.Natural
+    ( Natural )
 
 --------------------------------------------------------------------------------
 -- Hexadecimal representation
 --------------------------------------------------------------------------------
 
 newtype Hexadecimal a = Hexadecimal { unHexadecimal :: a }
-    deriving (Data, Eq, Generic, Hashable, NFData, Ord)
+    deriving (Data, Eq, Generic, Hashable, NFData, Num, Ord)
 
-instance Read (Hexadecimal Quid) where
-    readPrec = Hexadecimal . hexadecimalStringToQuid <$> readPrec
+deriving via Prefix "0x" (AsHex Natural) instance Read (Hexadecimal Quid)
+deriving via Prefix "0x" (AsHex Natural) instance Show (Hexadecimal Quid)
 
-instance Show (Hexadecimal Quid) where
-    show = show . hexadecimalStringFromQuid . unHexadecimal
+newtype AsHex a = AsHex a
 
---------------------------------------------------------------------------------
--- Hexadecimal characters
---------------------------------------------------------------------------------
+instance (Eq a, Num a) => Read (AsHex a) where
+    readsPrec _ = fmap (first AsHex) <$> readHex
 
-data HexadecimalChar
-    = H0 | H1 | H2 | H3 | H4 | H5 | H6 | H7
-    | H8 | H9 | HA | HB | HC | HD | HE | HF
-    deriving (Bounded, Enum, Eq, Generic, Ord, Read, Show)
-
-instance Arbitrary HexadecimalChar where
-    arbitrary = arbitraryHexadecimalChar
-    shrink = shrinkHexadecimalChar
-
---------------------------------------------------------------------------------
--- Generation and shrinking of arbitrary hexadecimal characters
---------------------------------------------------------------------------------
-
-arbitraryHexadecimalChar :: Gen HexadecimalChar
-arbitraryHexadecimalChar = arbitraryBoundedEnum
-
-shrinkHexadecimalChar :: HexadecimalChar -> [HexadecimalChar]
-shrinkHexadecimalChar = shrinkMap toEnum fromEnum
-
---------------------------------------------------------------------------------
--- Conversion between hexadecimal characters and ordinary characters
---------------------------------------------------------------------------------
-
-hexadecimalCharFromChar :: Char -> Maybe HexadecimalChar
-hexadecimalCharFromChar c = readMaybe ['H', c]
-
-hexadecimalCharToChar :: HexadecimalChar -> Char
-hexadecimalCharToChar = last . show
-
---------------------------------------------------------------------------------
--- Hexadecimal strings
---------------------------------------------------------------------------------
-
-newtype HexadecimalString = HexadecimalString
-    { unHexadecimalString :: NonEmpty HexadecimalChar }
-    deriving (Eq, Ord)
-
-instance Arbitrary HexadecimalString where
-    arbitrary = arbitraryHexadecimalString
-    shrink = shrinkHexadecimalString
-
---------------------------------------------------------------------------------
--- Conversion between hexadecimal strings and ordinary strings
---------------------------------------------------------------------------------
-
-instance Read HexadecimalString where
-    readPrec = do
-        void $ many (skipChar ' ')
-        HexadecimalString <$> ((:|) <$> readChar <*> many readChar)
-      where
-        readChar :: ReadPrec HexadecimalChar
-        readChar = readCharMaybe hexadecimalCharFromChar
-
-instance Show HexadecimalString where
-    show (HexadecimalString cs) = F.foldMap (pure . hexadecimalCharToChar) cs
-
---------------------------------------------------------------------------------
--- Generation and shrinking of arbitrary hexadecimal strings
---------------------------------------------------------------------------------
-
-arbitraryHexadecimalString :: Gen HexadecimalString
-arbitraryHexadecimalString = sized $ \size ->
-    fmap HexadecimalString . (:|)
-        <$> arbitraryHexadecimalChar
-        <*> replicateM size arbitraryHexadecimalChar
-
-shrinkHexadecimalString :: HexadecimalString -> [HexadecimalString]
-shrinkHexadecimalString =
-    shrinkMapBy HexadecimalString unHexadecimalString $
-    shrinkListNonEmpty shrinkHexadecimalChar
-
---------------------------------------------------------------------------------
--- Conversion between hexadecimal strings and quids
---------------------------------------------------------------------------------
-
-hexadecimalStringToQuid :: HexadecimalString -> Quid
-hexadecimalStringToQuid = nonEmptyListToQuid . unHexadecimalString
-
-hexadecimalStringFromQuid :: Quid -> HexadecimalString
-hexadecimalStringFromQuid = HexadecimalString . nonEmptyListFromQuid
+instance (Integral a, Show a) => Show (AsHex a) where
+    show (AsHex n) = showHex n ""
