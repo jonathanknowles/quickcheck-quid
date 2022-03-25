@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -29,7 +30,8 @@ import Test.QuickCheck
 --------------------------------------------------------------------------------
 
 newtype Size (n :: Nat) a = Size { unSize :: a }
-    deriving (Data, Eq, Generic, Hashable, NFData, Ord, Read, Show)
+    deriving (Data, Eq, Generic, Hashable, NFData, Ord)
+    deriving (Read, Show) via a
 
 instance (Arbitrary a, KnownNat n) => Arbitrary (Size n a) where
     arbitrary = Size <$> resize (fromIntegral $ natVal $ Proxy @n) arbitrary
