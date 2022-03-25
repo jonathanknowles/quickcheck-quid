@@ -10,7 +10,7 @@ module Test.QuickCheck.Quid.Representations.LatinSpec
     where
 
 import Internal.Test.QuickCheck.Quid
-    ( Quid, arbitraryQuid, quidFromNatural, shrinkQuid )
+    ( Quid, arbitraryQuid, naturalToQuid, shrinkQuid )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
     ( Latin (..), LatinString )
 import Numeric.Natural
@@ -44,7 +44,7 @@ spec = do
             property prop_roundTrip_LatinString_Quid
 
     parallel $ describe "Unit tests" $ do
-        unitTests_show_latin_quidFromNatural
+        unitTests_show_latin_naturalToQuid
 
 --------------------------------------------------------------------------------
 -- Properties
@@ -61,10 +61,10 @@ prop_roundTrip_LatinString_Quid latinString =
 -- Unit tests
 --------------------------------------------------------------------------------
 
-unitTests_show_latin_quidFromNatural :: Spec
-unitTests_show_latin_quidFromNatural = unitTests
-    "unitTests_show_latin_quidFromNatural"
-    (show . Latin . quidFromNatural)
+unitTests_show_latin_naturalToQuid :: Spec
+unitTests_show_latin_naturalToQuid = unitTests
+    "unitTests_show_latin_naturalToQuid"
+    (show . Latin . naturalToQuid)
     (mkTest <$> tests)
   where
     mkTest :: (Natural, String) -> UnitTestData Natural String

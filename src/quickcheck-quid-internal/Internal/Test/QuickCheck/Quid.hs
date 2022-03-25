@@ -79,8 +79,8 @@ shrinkQuid = shrinkMapBy Quid unQuid shrinkNatural
 -- Conversion between quids and natural numbers
 --------------------------------------------------------------------------------
 
-quidFromNatural :: Natural -> Quid
-quidFromNatural = Quid
+naturalToQuid :: Natural -> Quid
+naturalToQuid = Quid
 
 quidToNatural :: Quid -> Natural
 quidToNatural = unQuid

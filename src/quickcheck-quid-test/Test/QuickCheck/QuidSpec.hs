@@ -35,7 +35,7 @@ import Internal.Test.QuickCheck.Quid
     ( Quid
     , arbitraryQuid
     , chooseNatural
-    , quidFromNatural
+    , naturalToQuid
     , quidToNatural
     , shrinkNatural
     , shrinkQuid
@@ -412,7 +412,7 @@ prop_shrinkQuid_minimalElement q =
         s : _ -> s === minimalQuid
         _     -> q === minimalQuid
   where
-    minimalQuid = quidFromNatural 0
+    minimalQuid = naturalToQuid 0
 
 prop_shrinkQuid_minimalSet :: [Size 256 Quid] -> Property
 prop_shrinkQuid_minimalSet qs =
@@ -425,7 +425,7 @@ prop_shrinkQuid_minimalSet qs =
         ]
   where
     allQuids :: [Quid]
-    allQuids = quidFromNatural <$> [0 ..]
+    allQuids = naturalToQuid <$> [0 ..]
 
     bucket :: Int -> (Int, Int)
     bucket size = (lo, hi)

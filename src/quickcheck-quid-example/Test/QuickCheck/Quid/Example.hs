@@ -10,7 +10,7 @@ import GHC.Generics
 import Test.QuickCheck
     ( Arbitrary, CoArbitrary, Function )
 import Test.QuickCheck.Quid
-    ( Latin (..), Quid (..), Size (..), Hexadecimal (..) )
+    ( Hexadecimal (..), Latin (..), Quid (..), Size (..) )
 
 newtype ExampleQuid = ExampleQuid Quid
     deriving Arbitrary via (Size 256 Quid)

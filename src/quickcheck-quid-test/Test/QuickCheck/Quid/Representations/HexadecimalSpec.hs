@@ -11,7 +11,7 @@ module Test.QuickCheck.Quid.Representations.HexadecimalSpec
     where
 
 import Internal.Test.QuickCheck.Quid
-    ( Quid, quidFromNatural )
+    ( Quid, naturalToQuid )
 import Internal.Test.QuickCheck.Quid.Representations.Hexadecimal
     ( Hexadecimal (..) )
 import Numeric.Natural
@@ -41,16 +41,16 @@ spec = do
             ]
 
     parallel $ describe "Unit tests" $ do
-        unitTests_show_hexadecimal_quidFromNatural
+        unitTests_show_hexadecimal_naturalToQuid
 
 --------------------------------------------------------------------------------
 -- Unit tests
 --------------------------------------------------------------------------------
 
-unitTests_show_hexadecimal_quidFromNatural :: Spec
-unitTests_show_hexadecimal_quidFromNatural = unitTests
-    "unitTests_show_hexadecimal_quidFromNatural"
-    (show . Hexadecimal . quidFromNatural)
+unitTests_show_hexadecimal_naturalToQuid :: Spec
+unitTests_show_hexadecimal_naturalToQuid = unitTests
+    "unitTests_show_hexadecimal_naturalToQuid"
+    (show . Hexadecimal . naturalToQuid)
     (mkTest <$> tests)
   where
     mkTest :: (Natural, String) -> UnitTestData Natural String
