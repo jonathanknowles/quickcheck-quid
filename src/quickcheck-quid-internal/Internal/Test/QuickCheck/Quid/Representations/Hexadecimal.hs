@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
@@ -29,13 +30,17 @@ import Numeric
     ( readHex, showHex )
 import Numeric.Natural
     ( Natural )
+import Test.QuickCheck
+    ( Function )
 
 --------------------------------------------------------------------------------
 -- Hexadecimal representation
 --------------------------------------------------------------------------------
 
 newtype Hexadecimal a = Hexadecimal { unHexadecimal :: a }
-    deriving (Data, Eq, Generic, Hashable, NFData, Num, Ord)
+    deriving stock (Data, Eq, Generic, Ord)
+    deriving newtype (Hashable, NFData, Num)
+    deriving anyclass Function
 
 deriving via Prefix "0x" (AsHex Natural) instance Read (Hexadecimal Quid)
 deriving via Prefix "0x" (AsHex Natural) instance Show (Hexadecimal Quid)

@@ -1,5 +1,7 @@
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
@@ -30,6 +32,7 @@ import Internal.Test.QuickCheck.Quid.Representations
     ( nonEmptyListFromQuid, nonEmptyListToQuid )
 import Test.QuickCheck
     ( Arbitrary (..)
+    , Function
     , Gen
     , arbitraryBoundedEnum
     , shrinkMap
@@ -47,7 +50,9 @@ import qualified Data.List.NonEmpty as NE
 --------------------------------------------------------------------------------
 
 newtype Latin a = Latin { unLatin :: a }
-    deriving (Data, Eq, Generic, Hashable, NFData, Ord)
+    deriving stock (Data, Eq, Generic, Ord)
+    deriving newtype (Hashable, NFData)
+    deriving anyclass Function
 
 instance Read (Latin Quid) where
     readPrec = fromString <$> readPrec
@@ -97,7 +102,8 @@ latinCharToChar = head . show
 
 newtype LatinString = LatinString
     { unLatinString :: NonEmpty LatinChar }
-    deriving (Eq, Ord, Semigroup)
+    deriving stock (Eq, Ord)
+    deriving newtype Semigroup
 
 instance Arbitrary LatinString where
     arbitrary = arbitraryLatinString

@@ -4,7 +4,6 @@ module Test.QuickCheck.Quid
       Quid (..)
 
     -- * Combinators
-    , Prefix (..)
     , Size (..)
 
     -- * Representations
@@ -15,8 +14,6 @@ module Test.QuickCheck.Quid
 
 import Internal.Test.QuickCheck.Quid
     ( Quid (..) )
-import Internal.Test.QuickCheck.Quid.Combinators.Prefix
-    ( Prefix (..) )
 import Internal.Test.QuickCheck.Quid.Combinators.Size
     ( Size (..) )
 import Internal.Test.QuickCheck.Quid.Representations.Hexadecimal

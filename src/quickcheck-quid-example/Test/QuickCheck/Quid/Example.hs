@@ -8,30 +8,24 @@ module Test.QuickCheck.Quid.Example where
 import GHC.Generics
     ( Generic )
 import Test.QuickCheck
-    ( Arbitrary
-    , CoArbitrary
-    , Fun
-    , Function
-    , Property
-    , applyFun
-    , label
-    , property
-    , (===)
-    )
+    ( Arbitrary, CoArbitrary, Function )
 import Test.QuickCheck.Quid
-    ( Latin (..), Prefix (..), Quid (..), Size (..) )
+    ( Latin (..), Quid (..), Size (..), Hexadecimal (..) )
 
-newtype ExampleQuid = ExampleQuid {unExampleQuid :: Quid}
-    deriving (Read, Show) via (Prefix "example-quid:" (Latin Quid))
+newtype ExampleQuid = ExampleQuid Quid
     deriving Arbitrary via (Size 256 Quid)
     deriving CoArbitrary via Quid
     deriving anyclass Function
-    deriving stock (Eq, Generic, Ord)
+    deriving stock (Eq, Generic, Ord, Read, Show)
 
-prop_function :: Fun ExampleQuid Bool -> ExampleQuid -> Property
-prop_function f q =
-    label (show (applyFun f q)) $
-    property True
+newtype ExampleHexadecimalQuid = ExampleHexadecimalQuid (Hexadecimal Quid)
+    deriving Arbitrary via (Size 256 Quid)
+    deriving CoArbitrary via Quid
+    deriving anyclass Function
+    deriving stock (Eq, Generic, Ord, Read, Show)
 
-prop_minimalFailure :: ExampleQuid -> ExampleQuid -> Property
-prop_minimalFailure q1 q2 = q1 === q2
+newtype ExampleLatinQuid = ExampleLatinQuid (Latin Quid)
+    deriving Arbitrary via (Size 256 Quid)
+    deriving CoArbitrary via Quid
+    deriving anyclass Function
+    deriving stock (Eq, Generic, Ord, Read, Show)
