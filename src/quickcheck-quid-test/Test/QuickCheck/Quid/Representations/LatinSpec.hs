@@ -68,7 +68,7 @@ unitTests_show_latin_quidFromNatural = unitTests
     (mkTest <$> tests)
   where
     mkTest :: (Natural, String) -> UnitTestData Natural String
-    mkTest (params, result) = UnitTestData {params, result}
+    mkTest (params, result) = UnitTestData {params, result = show result}
 
     (^) :: Natural -> Natural -> Natural
     (^) = (Prelude.^)

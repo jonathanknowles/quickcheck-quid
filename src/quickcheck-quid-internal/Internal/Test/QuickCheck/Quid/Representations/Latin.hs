@@ -6,18 +6,20 @@
 module Internal.Test.QuickCheck.Quid.Representations.Latin
     where
 
-import Control.Applicative
-    ( many )
 import Control.DeepSeq
     ( NFData )
 import Control.Monad
-    ( replicateM, void )
+    ( replicateM )
 import Data.Data
     ( Data )
 import Data.Hashable
     ( Hashable (..) )
 import Data.List.NonEmpty
     ( NonEmpty (..) )
+import Data.Maybe
+    ( fromMaybe )
+import Data.String
+    ( IsString (..) )
 import GHC.Generics
     ( Generic )
 import Internal.Test.QuickCheck
@@ -26,8 +28,6 @@ import Internal.Test.QuickCheck.Quid
     ( Quid (..) )
 import Internal.Test.QuickCheck.Quid.Representations
     ( nonEmptyListFromQuid, nonEmptyListToQuid )
-import Internal.Text.Read
-    ( readCharMaybe, skipChar )
 import Test.QuickCheck
     ( Arbitrary (..)
     , Gen
@@ -37,9 +37,10 @@ import Test.QuickCheck
     , sized
     )
 import Text.Read
-    ( Read (..), ReadPrec, readMaybe )
+    ( Read (..), readMaybe )
 
 import qualified Data.Foldable as F
+import qualified Data.List.NonEmpty as NE
 
 --------------------------------------------------------------------------------
 -- Latin representation
@@ -49,10 +50,13 @@ newtype Latin a = Latin { unLatin :: a }
     deriving (Data, Eq, Generic, Hashable, NFData, Ord)
 
 instance Read (Latin Quid) where
-    readPrec = Latin . latinStringToQuid <$> readPrec
+    readPrec = fromString <$> readPrec
 
 instance Show (Latin Quid) where
     show = show . latinStringFromQuid . unLatin
+
+instance IsString (Latin Quid) where
+    fromString = Latin . latinStringToQuid . fromString
 
 --------------------------------------------------------------------------------
 -- Latin characters
@@ -81,8 +85,8 @@ shrinkLatinChar = shrinkMap toEnum fromEnum
 -- Conversion between Latin characters and ordinary characters
 --------------------------------------------------------------------------------
 
-latinCharFromChar :: Char -> Maybe LatinChar
-latinCharFromChar c = readMaybe [c]
+charToLatinChar :: Char -> Maybe LatinChar
+charToLatinChar c = readMaybe [c]
 
 latinCharToChar :: LatinChar -> Char
 latinCharToChar = head . show
@@ -93,7 +97,7 @@ latinCharToChar = head . show
 
 newtype LatinString = LatinString
     { unLatinString :: NonEmpty LatinChar }
-    deriving (Eq, Ord)
+    deriving (Eq, Ord, Semigroup)
 
 instance Arbitrary LatinString where
     arbitrary = arbitraryLatinString
@@ -104,15 +108,28 @@ instance Arbitrary LatinString where
 --------------------------------------------------------------------------------
 
 instance Read LatinString where
-    readPrec = do
-        void $ many (skipChar ' ')
-        LatinString <$> ((:|) <$> readChar <*> many readChar)
-      where
-        readChar :: ReadPrec LatinChar
-        readChar = readCharMaybe latinCharFromChar
+    readPrec = fromString <$> readPrec
 
 instance Show LatinString where
-    show (LatinString cs) = F.foldMap show cs
+    show = show . latinStringToString
+
+instance IsString LatinString where
+    fromString = unsafeStringtoLatinString
+
+latinStringToString :: LatinString -> String
+latinStringToString (LatinString cs) = F.foldMap show cs
+
+stringToLatinString :: String -> Maybe LatinString
+stringToLatinString s =
+    LatinString <$> (NE.nonEmpty =<< traverse charToLatinChar s)
+
+unsafeStringtoLatinString :: String -> LatinString
+unsafeStringtoLatinString = fromMaybe raiseError . stringToLatinString
+  where
+    raiseError = error $ unwords
+        [ "A Latin string must be composed of one or more uppercase"
+        , "characters in the range [A-Z]."
+        ]
 
 --------------------------------------------------------------------------------
 -- Generation and shrinking of arbitrary Latin strings
