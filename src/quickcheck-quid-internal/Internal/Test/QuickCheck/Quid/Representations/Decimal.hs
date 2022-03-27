@@ -24,11 +24,15 @@ import GHC.Generics
 import Internal.Test.QuickCheck.Quid
     ( Quid (..) )
 import Numeric
-    ( readDec, showInt )
+    ( showInt )
 import Numeric.Natural
     ( Natural )
 import Test.QuickCheck
     ( Function )
+import Text.ParserCombinators.ReadP
+    ( readP_to_S, skipSpaces )
+import Text.Read.Lex
+    ( readDecP )
 
 --------------------------------------------------------------------------------
 -- Decimal representation
@@ -45,7 +49,7 @@ deriving via AsDecimal Natural instance Show (Decimal Quid)
 newtype AsDecimal a = AsDecimal a
 
 instance (Eq a, Num a) => Read (AsDecimal a) where
-    readsPrec _ = fmap (first AsDecimal) <$> readDec
+    readsPrec _ = fmap (first AsDecimal) <$> readP_to_S (skipSpaces >> readDecP)
 
 instance (Integral a, Show a) => Show (AsDecimal a) where
     show (AsDecimal n) = showInt n ""
