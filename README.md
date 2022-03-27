@@ -1,1 +1,1 @@
-# quickcheck-quid
+Quasi-unique identifiers for QuickCheck.
