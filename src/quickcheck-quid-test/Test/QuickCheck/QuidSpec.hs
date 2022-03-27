@@ -38,14 +38,11 @@ import Internal.Test.QuickCheck.Quid
     , naturalToQuid
     , quidToNatural
     , shrinkNatural
-    , shrinkQuid
     )
-import Internal.Test.QuickCheck.Quid.Combinators.Prefix
-    ( Prefix (..) )
 import Internal.Test.QuickCheck.Quid.Combinators.Size
     ( Size (..) )
-import Internal.Test.QuickCheck.Quid.Representations.Latin
-    ( Latin (..) )
+import Internal.Test.QuickCheck.Quid.Representations.Decimal
+    ( Decimal (..) )
 import Numeric.Natural
     ( Natural )
 import Test.Hspec
@@ -85,11 +82,11 @@ spec :: Spec
 spec = do
 
     parallel $ describe "Lawfulness of type class instances" $ do
-        testLawsMany @Quid
+        testLawsMany @TestQuid
             [ Laws.eqLaws
             , Laws.ordLaws
             ]
-        testLawsMany @TestId
+        testLawsMany @TestQuid
             [ Laws.eqLaws
             , Laws.ordLaws
             , Laws.showLaws
@@ -392,29 +389,29 @@ prop_arbitraryQuid_unique =
     forAllBlind arbitraryFixedSizeQuids $ \uids ->
         Set.size (Set.fromList uids) === L.length uids
   where
-    arbitraryFixedSizeQuids :: Gen [Quid]
+    arbitraryFixedSizeQuids :: Gen [TestQuid]
     arbitraryFixedSizeQuids = fmap (unSize . getFixed) <$>
-        replicateM 1_000_000 (arbitrary @(Fixed (Size 256 Quid)))
+        replicateM 1_000_000 (arbitrary @(Fixed (Size 256 TestQuid)))
 
 --------------------------------------------------------------------------------
 -- Shrinkability
 --------------------------------------------------------------------------------
 
-prop_shrinkQuid_lessThan :: Size 256 Quid -> Property
+prop_shrinkQuid_lessThan :: Size 256 TestQuid -> Property
 prop_shrinkQuid_lessThan (Size q) =
-    property $ all (< q) (shrinkQuid q)
+    property $ all (< q) (shrink q)
 
-prop_shrinkQuid_minimalElement :: Quid -> Property
+prop_shrinkQuid_minimalElement :: TestQuid -> Property
 prop_shrinkQuid_minimalElement q =
     checkCoverage $
     cover 10 (q /= minimalQuid) "q /= minimalQuid" $
-    case shrinkQuid q of
+    case shrink q of
         s : _ -> s === minimalQuid
         _     -> q === minimalQuid
   where
-    minimalQuid = naturalToQuid 0
+    minimalQuid = TestQuid 0
 
-prop_shrinkQuid_minimalSet :: [Size 256 Quid] -> Property
+prop_shrinkQuid_minimalSet :: [Size 256 TestQuid] -> Property
 prop_shrinkQuid_minimalSet qs =
     label (show $ bucket expectedSize) $
     counterexample (show expectedSize) $
@@ -424,8 +421,8 @@ prop_shrinkQuid_minimalSet qs =
         , Set.size minimalSet == expectedSize
         ]
   where
-    allQuids :: [Quid]
-    allQuids = naturalToQuid <$> [0 ..]
+    allQuids :: [TestQuid]
+    allQuids = TestQuid . naturalToQuid <$> [0 ..]
 
     bucket :: Int -> (Int, Int)
     bucket size = (lo, hi)
@@ -436,22 +433,22 @@ prop_shrinkQuid_minimalSet qs =
     expectedSize :: Int
     expectedSize = L.length qs
 
-    minimalSet :: Set Quid
+    minimalSet :: Set TestQuid
     minimalSet = Set.map unSize $ fromMaybe
         (error "Cannot shrink to minimal set")
         (shrinkWhile ((>= expectedSize) . Set.size) shrink (Set.fromList qs))
 
-prop_shrinkQuid_ordered :: Size 256 Quid -> Property
+prop_shrinkQuid_ordered :: Size 256 TestQuid -> Property
 prop_shrinkQuid_ordered (Size q) =
     L.sort shrunkValues === shrunkValues
   where
-    shrunkValues = shrinkQuid q
+    shrunkValues = shrink q
 
-prop_shrinkQuid_unique :: Size 256 Quid -> Property
+prop_shrinkQuid_unique :: Size 256 TestQuid -> Property
 prop_shrinkQuid_unique (Size q) =
     Set.size (Set.fromList shrunkValues) === L.length shrunkValues
   where
-    shrunkValues = shrinkQuid q
+    shrunkValues = shrink q
 
 --------------------------------------------------------------------------------
 -- Shrinking
@@ -522,7 +519,7 @@ check condition conditionTitle =
 -- Test types
 --------------------------------------------------------------------------------
 
-newtype TestId = TestId Quid
-    deriving (Eq, Ord)
-    deriving Arbitrary via (Size 256 Quid)
-    deriving (Read, Show) via (Prefix "test-id:" (Latin Quid))
+newtype TestQuid = TestQuid Quid
+    deriving (Read, Show) via (Decimal Quid)
+    deriving Arbitrary via Quid
+    deriving stock (Eq, Ord)

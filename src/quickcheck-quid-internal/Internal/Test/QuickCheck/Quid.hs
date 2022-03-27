@@ -28,7 +28,7 @@ import Test.QuickCheck
     , Gen
     , chooseInteger
     , coarbitraryShow
-    , functionShow
+    , functionMap
     , shrinkMapBy
     , sized
     )
@@ -43,8 +43,8 @@ import qualified Data.List as L
 
 newtype Quid = Quid
     { unQuid :: Natural }
-    deriving (Data, Eq, Generic, Hashable, NFData, Num, Ord)
-    deriving (Read, Show) via Natural
+    deriving (Data, Eq, Generic, Ord)
+    deriving newtype (Hashable, NFData, Num)
 
 instance Arbitrary Quid where
     arbitrary = arbitraryQuid
@@ -67,10 +67,10 @@ chooseQuid :: (Quid, Quid) -> Gen Quid
 chooseQuid (Quid n1, Quid n2) = Quid <$> chooseNatural (n1, n2)
 
 coarbitraryQuid :: Quid -> Gen a -> Gen a
-coarbitraryQuid = coarbitraryShow
+coarbitraryQuid = coarbitraryShow . unQuid
 
 functionQuid :: (Quid -> a) -> Quid :-> a
-functionQuid = functionShow
+functionQuid = functionMap (show . unQuid) (Quid . read)
 
 shrinkQuid :: Quid -> [Quid]
 shrinkQuid = shrinkMapBy Quid unQuid shrinkNatural
