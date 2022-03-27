@@ -11,7 +11,7 @@ import GHC.Generics
 import Test.QuickCheck
     ( Arbitrary, CoArbitrary, Function )
 import Test.QuickCheck.Quid
-    ( Decimal (..), Hexadecimal (..), Latin (..), Quid (..), Size (..) )
+    ( Decimal (..), Hexadecimal (..), Latin (..), Quid, Size (..) )
 
 newtype ExampleDecimalQuid = ExampleDecimalQuid (Decimal Quid)
     deriving stock (Eq, Generic, Ord, Read, Show)

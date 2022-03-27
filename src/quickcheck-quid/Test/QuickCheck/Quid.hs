@@ -1,7 +1,7 @@
 module Test.QuickCheck.Quid
     (
     -- * The Quid type
-      Quid (..)
+      Quid
 
     -- * Combinators
     , Size (..)
