@@ -10,9 +10,9 @@ import GHC.Generics
 import Test.QuickCheck
     ( Arbitrary, CoArbitrary, Function )
 import Test.QuickCheck.Quid
-    ( Hexadecimal (..), Latin (..), Quid (..), Size (..) )
+    ( Decimal (..), Hexadecimal (..), Latin (..), Quid (..), Size (..) )
 
-newtype ExampleQuid = ExampleQuid Quid
+newtype ExampleDecimalQuid = ExampleDecimalQuid (Decimal Quid)
     deriving Arbitrary via (Size 256 Quid)
     deriving CoArbitrary via Quid
     deriving anyclass Function
