@@ -6,11 +6,13 @@ module Test.QuickCheck.Quid
     -- * Combinators
     , Size (..)
 
-    -- * Numerical representations
+    -- * Representations
+
+    -- ** Numerical representations
     , Decimal (..)
     , Hexadecimal (..)
 
-    -- * String representations
+    -- ** String representations
     , Latin (..)
     )
     where
