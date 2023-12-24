@@ -12,6 +12,8 @@ import Control.DeepSeq
     ( NFData )
 import Control.Monad
     ( replicateM )
+import Data.Char
+    ( ord )
 import Data.Data
     ( Data )
 import Data.Hashable
@@ -94,7 +96,7 @@ charToLatinChar :: Char -> Maybe LatinChar
 charToLatinChar c = readMaybe [c]
 
 latinCharToChar :: LatinChar -> Char
-latinCharToChar = head . show
+latinCharToChar = toEnum . (+ ord 'A') . fromEnum
 
 --------------------------------------------------------------------------------
 -- Latin strings
