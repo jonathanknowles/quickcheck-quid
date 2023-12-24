@@ -376,10 +376,16 @@ prop_arbitraryQuid_uniform p =
         occupiedBucketCount = fromIntegral $ length occupiedBucketFrequencies
 
         minimumObservedFrequency :: Frequency
-        minimumObservedFrequency = snd $ last occupiedBucketFrequencies
+        minimumObservedFrequency =
+            snd $ lastNote note occupiedBucketFrequencies
+          where
+            note = "minimumObservedFrequency: unexpected empty list"
 
         maximumObservedFrequency :: Frequency
-        maximumObservedFrequency = snd $ head occupiedBucketFrequencies
+        maximumObservedFrequency =
+            snd $ headNote note occupiedBucketFrequencies
+          where
+            note = "maximumObservedFrequency: unexpected empty list"
 
 --------------------------------------------------------------------------------
 -- Uniqueness
@@ -516,6 +522,23 @@ check condition conditionTitle =
     (.&&.) (counterexample counterexampleText $ property condition)
   where
     counterexampleText = "Condition violated: " <> conditionTitle
+
+--------------------------------------------------------------------------------
+-- Utilities
+--------------------------------------------------------------------------------
+
+headNote :: String -> [a] -> a
+headNote note = g
+  where
+    g [] = error note
+    g (a : _) = a
+
+lastNote :: String -> [a] -> a
+lastNote note = g
+  where
+    g [] = error note
+    g [a] = a
+    g (_ : as) = g as
 
 --------------------------------------------------------------------------------
 -- Test types
