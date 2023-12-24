@@ -12,7 +12,12 @@ module Test.QuickCheck.Quid.Representations.LatinSpec
 import Internal.Test.QuickCheck.Quid
     ( Quid, arbitraryQuid, naturalToQuid, shrinkQuid )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
-    ( Latin (..), LatinString )
+    ( Latin (..)
+    , LatinChar (..)
+    , LatinString
+    , charToLatinChar
+    , latinCharToChar
+    )
 import Numeric.Natural
     ( Natural )
 import Test.Hspec
@@ -40,6 +45,8 @@ spec = do
             ]
 
     parallel $ describe "Round-trip tests" $ do
+        it "Roundtrip between Latin characters and characters" $
+            property prop_roundTrip_LatinChar_Char
         it "Roundtrip between Latin strings and quids" $
             property prop_roundTrip_LatinString_Quid
 
@@ -49,6 +56,10 @@ spec = do
 --------------------------------------------------------------------------------
 -- Properties
 --------------------------------------------------------------------------------
+
+prop_roundTrip_LatinChar_Char :: LatinChar -> Property
+prop_roundTrip_LatinChar_Char c =
+    charToLatinChar (latinCharToChar c) === Just c
 
 prop_roundTrip_LatinString_Quid :: LatinString -> Property
 prop_roundTrip_LatinString_Quid latinString =
