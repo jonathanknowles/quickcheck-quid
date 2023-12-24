@@ -11,6 +11,8 @@ module Test.QuickCheck.Quid.Representations.LatinSpec
 
 import Data.Function
     ( (&) )
+import Data.List
+    ( uncons )
 import Internal.Test.QuickCheck.Quid
     ( Quid, arbitraryQuid, naturalToQuid, shrinkQuid )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
@@ -47,6 +49,9 @@ spec = do
             ]
 
     parallel $ describe "Properties" $ do
+        it "prop_latinCharToChar_uncons_show" $
+            prop_latinCharToChar_uncons_show
+                & property
         it "prop_roundTrip_LatinChar_Char" $
             prop_roundTrip_LatinChar_Char
                 & property
@@ -60,6 +65,10 @@ spec = do
 --------------------------------------------------------------------------------
 -- Properties
 --------------------------------------------------------------------------------
+
+prop_latinCharToChar_uncons_show :: LatinChar -> Property
+prop_latinCharToChar_uncons_show c =
+    Just (latinCharToChar c) === fmap fst (uncons (show c))
 
 prop_roundTrip_LatinChar_Char :: LatinChar -> Property
 prop_roundTrip_LatinChar_Char c =
