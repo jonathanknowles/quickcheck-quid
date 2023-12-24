@@ -9,10 +9,19 @@
 module Test.QuickCheck.Quid.Representations.LatinSpec
     where
 
+import Data.Function
+    ( (&) )
+import Data.List
+    ( uncons )
 import Internal.Test.QuickCheck.Quid
     ( Quid, arbitraryQuid, naturalToQuid, shrinkQuid )
 import Internal.Test.QuickCheck.Quid.Representations.Latin
-    ( Latin (..), LatinString )
+    ( Latin (..)
+    , LatinChar (..)
+    , LatinString
+    , charToLatinChar
+    , latinCharToChar
+    )
 import Numeric.Natural
     ( Natural )
 import Test.Hspec
@@ -39,9 +48,16 @@ spec = do
             , Laws.showReadLaws
             ]
 
-    parallel $ describe "Round-trip tests" $ do
-        it "Roundtrip between Latin strings and quids" $
-            property prop_roundTrip_LatinString_Quid
+    parallel $ describe "Properties" $ do
+        it "prop_latinCharToChar_uncons_show" $
+            prop_latinCharToChar_uncons_show
+                & property
+        it "prop_roundTrip_LatinChar_Char" $
+            prop_roundTrip_LatinChar_Char
+                & property
+        it "prop_roundTrip_LatinString_Quid" $
+            prop_roundTrip_LatinString_Quid
+                & property
 
     parallel $ describe "Unit tests" $ do
         unitTests_show_latin_naturalToQuid
@@ -49,6 +65,14 @@ spec = do
 --------------------------------------------------------------------------------
 -- Properties
 --------------------------------------------------------------------------------
+
+prop_latinCharToChar_uncons_show :: LatinChar -> Property
+prop_latinCharToChar_uncons_show c =
+    Just (latinCharToChar c) === fmap fst (uncons (show c))
+
+prop_roundTrip_LatinChar_Char :: LatinChar -> Property
+prop_roundTrip_LatinChar_Char c =
+    charToLatinChar (latinCharToChar c) === Just c
 
 prop_roundTrip_LatinString_Quid :: LatinString -> Property
 prop_roundTrip_LatinString_Quid latinString =
