@@ -145,9 +145,11 @@ instance Buildable PrimeNumber where
 evalPrimeNumber :: PrimeNumber -> Natural
 evalPrimeNumber = indexToPrime primes . primeNumberIndex
   where
-    indexToPrime ps i
-        | i == 0 = head ps
-        | otherwise = indexToPrime (drop 1 ps) (i - 1)
+    indexToPrime (p : ps) i
+        | i == 0 = p
+        | otherwise = indexToPrime ps (i - 1)
+    indexToPrime [] _ =
+        error "evalPrimeNumber: Unexpected empty list of prime numbers."
 
 genPrimeNumber :: (Natural, Natural) -> Gen PrimeNumber
 genPrimeNumber (lo, hi) = PrimeNumber <$> chooseNatural (lo, hi)
