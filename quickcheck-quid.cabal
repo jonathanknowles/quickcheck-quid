@@ -24,29 +24,29 @@ source-repository head
     location: https://github.com/jonathanknowles/quickcheck-quid
 
 common dependency-base
-    build-depends:base
+    build-depends:base                          >= 4.14.3.0
 common dependency-containers
-    build-depends:containers
+    build-depends:containers                    >= 0.5.7.0
 common dependency-deepseq
-    build-depends:deepseq
+    build-depends:deepseq                       >= 1.4.4.0
 common dependency-extra
-    build-depends:extra
+    build-depends:extra                         >= 1.5
 common dependency-fmt
-    build-depends:fmt
+    build-depends:fmt                           >= 0.6.1
 common dependency-hashable
-    build-depends:hashable
+    build-depends:hashable                      >= 1.3.0.0
 common dependency-hspec
-    build-depends:hspec
+    build-depends:hspec                         >= 2.7.1
 common dependency-pretty-simple
-    build-depends:pretty-simple
+    build-depends:pretty-simple                 >= 1.0.0.0
 common dependency-primes
-    build-depends:primes
+    build-depends:primes                        >= 0.2.0.0
 common dependency-QuickCheck
-    build-depends:QuickCheck
+    build-depends:QuickCheck                    >= 2.14
 common dependency-quickcheck-classes
-    build-depends:quickcheck-classes
+    build-depends:quickcheck-classes            >= 0.6.2.0
 common dependency-text
-    build-depends:text
+    build-depends:text                          >= 1.2.3.2
 
 library
     import:
