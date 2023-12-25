@@ -13,22 +13,22 @@ import Test.QuickCheck
 import Test.QuickCheck.Quid
     ( Decimal (..), Hexadecimal (..), Latin (..), Quid, Size (..) )
 
-newtype ExampleDecimalQuid = ExampleDecimalQuid (Decimal Quid)
+newtype FooId = FooId (Decimal Quid)
     deriving stock (Eq, Generic, Ord, Read, Show)
-    deriving Arbitrary via (Size 256 Quid)
+    deriving Arbitrary via Size 256 Quid
     deriving CoArbitrary via Quid
     deriving anyclass Function
     deriving newtype Num
 
-newtype ExampleHexadecimalQuid = ExampleHexadecimalQuid (Hexadecimal Quid)
+newtype BarId = BarId (Hexadecimal Quid)
     deriving stock (Eq, Generic, Ord, Read, Show)
-    deriving Arbitrary via (Size 256 Quid)
+    deriving Arbitrary via Size 256 Quid
     deriving CoArbitrary via Quid
     deriving anyclass Function
     deriving newtype Num
 
-newtype ExampleLatinQuid = ExampleLatinQuid (Latin Quid)
+newtype BazId = BazId (Latin Quid)
     deriving stock (Eq, Generic, Ord, Read, Show)
-    deriving Arbitrary via (Size 256 Quid)
+    deriving Arbitrary via Size 256 Quid
     deriving CoArbitrary via Quid
     deriving anyclass Function
