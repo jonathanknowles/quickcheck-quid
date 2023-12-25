@@ -17,6 +17,7 @@ description:
     https://github.com/jonathanknowles/quickcheck-quid/blob/main/README.md
 
 extra-doc-files:
+    CHANGELOG.md
     README.md
 
 source-repository head
