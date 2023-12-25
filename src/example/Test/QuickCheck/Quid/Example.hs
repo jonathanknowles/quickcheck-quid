@@ -15,20 +15,20 @@ import Test.QuickCheck.Quid
 
 newtype FooId = FooId (Decimal Quid)
     deriving stock (Eq, Generic, Ord, Read, Show)
-    deriving Arbitrary via (Size 256 Quid)
+    deriving Arbitrary via Size 256 Quid
     deriving CoArbitrary via Quid
     deriving anyclass Function
     deriving newtype Num
 
 newtype BarId = BarId (Hexadecimal Quid)
     deriving stock (Eq, Generic, Ord, Read, Show)
-    deriving Arbitrary via (Size 256 Quid)
+    deriving Arbitrary via Size 256 Quid
     deriving CoArbitrary via Quid
     deriving anyclass Function
     deriving newtype Num
 
 newtype BazId = BazId (Latin Quid)
     deriving stock (Eq, Generic, Ord, Read, Show)
-    deriving Arbitrary via (Size 256 Quid)
+    deriving Arbitrary via Size 256 Quid
     deriving CoArbitrary via Quid
     deriving anyclass Function
