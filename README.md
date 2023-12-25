@@ -1,3 +1,4 @@
-Quasi-unique identifiers for QuickCheck.
+# `quickcheck-quid`
+<a href="https://jonathanknowles.github.io/quickcheck-quid/"><img src="https://img.shields.io/badge/API-Documentation-227755" /></a>
 
-![Build Status](https://github.com/jonathanknowles/quickcheck-quid/actions/workflows/haskell.yml/badge.svg)
+Quasi-unique identifiers for QuickCheck.
