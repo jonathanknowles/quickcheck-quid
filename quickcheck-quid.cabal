@@ -43,7 +43,7 @@ common dependency-pretty-simple
 common dependency-primes
     build-depends:primes                        >= 0.2.0.0    && < 0.3
 common dependency-QuickCheck
-    build-depends:QuickCheck                    >= 2.14       && < 2.15
+    build-depends:QuickCheck                    >= 2.14       && < 2.16
 common dependency-quickcheck-classes
     build-depends:quickcheck-classes            >= 0.6.2.0    && < 0.7
 common dependency-text
