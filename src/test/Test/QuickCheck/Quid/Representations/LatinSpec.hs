@@ -30,8 +30,8 @@ import Test.Hspec.Unit
     ( UnitTestData (..), unitTests )
 import Test.QuickCheck
     ( Arbitrary (..), Property, property, shrinkMapBy, (===) )
-import Test.QuickCheck.Classes.Hspec
-    ( testLawsMany )
+import Test.Hspec.QuickCheck.Classes
+    ( testLaws )
 
 import Prelude hiding
     ( (^) )
@@ -43,7 +43,7 @@ spec :: Spec
 spec = do
 
     parallel $ describe "Lawfulness of type class instances" $ do
-        testLawsMany @(Latin Quid)
+        testLaws @(Latin Quid)
             [ Laws.showLaws
             , Laws.showReadLaws
             ]

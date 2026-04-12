@@ -14,8 +14,8 @@ import Test.Hspec
     ( Spec, describe, parallel )
 import Test.QuickCheck
     ( Arbitrary (..), shrinkMapBy )
-import Test.QuickCheck.Classes.Hspec
-    ( testLawsMany )
+import Test.Hspec.QuickCheck.Classes
+    ( testLaws )
 
 import qualified Test.QuickCheck.Classes as Laws
 
@@ -23,19 +23,19 @@ spec :: Spec
 spec = do
 
     parallel $ describe "Lawfulness of type class instances" $ do
-        testLawsMany @(Prefix "A" Int)
+        testLaws @(Prefix "A" Int)
             [ Laws.showLaws
             , Laws.showReadLaws
             ]
-        testLawsMany @(Prefix ":" Int)
+        testLaws @(Prefix ":" Int)
             [ Laws.showLaws
             , Laws.showReadLaws
             ]
-        testLawsMany @(Prefix "1" Int)
+        testLaws @(Prefix "1" Int)
             [ Laws.showLaws
             , Laws.showReadLaws
             ]
-        testLawsMany @(Prefix "test-prefix:" Int)
+        testLaws @(Prefix "test-prefix:" Int)
             [ Laws.showLaws
             , Laws.showReadLaws
             ]

@@ -68,8 +68,8 @@ import Test.QuickCheck
     , (.&&.)
     , (===)
     )
-import Test.QuickCheck.Classes.Hspec
-    ( testLawsMany )
+import Test.Hspec.QuickCheck.Classes
+    ( testLaws )
 import Text.Pretty.Simple
     ( pShow )
 
@@ -82,11 +82,11 @@ spec :: Spec
 spec = do
 
     parallel $ describe "Lawfulness of type class instances" $ do
-        testLawsMany @TestQuid
+        testLaws @TestQuid
             [ Laws.eqLaws
             , Laws.ordLaws
             ]
-        testLawsMany @TestQuid
+        testLaws @TestQuid
             [ Laws.eqLaws
             , Laws.ordLaws
             , Laws.showLaws
