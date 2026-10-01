@@ -64,10 +64,11 @@ import Test.QuickCheck
     , property
     , resize
     , shrinkMapBy
-    , withMaxSuccess
     , (.&&.)
     , (===)
     )
+import Test.QuickCheck.Compatibility
+    ( withNumTests )
 import Test.Hspec.QuickCheck.Classes
     ( testLaws )
 import Text.Pretty.Simple
@@ -393,7 +394,7 @@ prop_arbitraryQuid_uniform p =
 
 prop_arbitraryQuid_unique :: Property
 prop_arbitraryQuid_unique =
-    withMaxSuccess 1 $
+    withNumTests 1 $
     forAllBlind arbitraryFixedSizeQuids $ \uids ->
         Set.size (Set.fromList uids) === L.length uids
   where
