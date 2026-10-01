@@ -119,6 +119,7 @@ test-suite test
     hs-source-dirs:
         src/test
     other-modules:
+        Test.QuickCheck.Compatibility
         Test.QuickCheck.QuidSpec
         Test.QuickCheck.Quid.Combinators.PrefixSpec
         Test.QuickCheck.Quid.Representations.DecimalSpec
