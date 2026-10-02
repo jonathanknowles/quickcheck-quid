@@ -1,6 +1,6 @@
 cabal-version:  3.0
 name:           quickcheck-quid
-version:        0.0.1.9
+version:        0.0.1.10
 bug-reports:    https://github.com/jonathanknowles/quickcheck-quid/issues
 license:        Apache-2.0
 license-file:   LICENSE
@@ -45,7 +45,7 @@ common dependency-pretty-simple
 common dependency-primes
     build-depends:primes                        >= 0.2.0.0    && < 0.3
 common dependency-QuickCheck
-    build-depends:QuickCheck                    >= 2.14       && < 2.19
+    build-depends:QuickCheck                    >= 2.14       && < 2.20
 common dependency-quickcheck-classes
     build-depends:quickcheck-classes            >= 0.6.2.0    && < 0.7
 common dependency-text
@@ -119,6 +119,7 @@ test-suite test
     hs-source-dirs:
         src/test
     other-modules:
+        Test.QuickCheck.Compatibility
         Test.QuickCheck.QuidSpec
         Test.QuickCheck.Quid.Combinators.PrefixSpec
         Test.QuickCheck.Quid.Representations.DecimalSpec
